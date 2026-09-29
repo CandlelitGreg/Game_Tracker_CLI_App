@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "OUEPGTHDZQM=",
+  "success": true,
+  "projectFilePath": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/Tests_and_Experiments.csproj",
+  "expectedPackageFiles": [
+    "/Users/gregwilkinson/.nuget/packages/csvhelper/33.1.0/csvhelper.33.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}
