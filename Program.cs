@@ -12,10 +12,9 @@ namespace GameTrackerEx01
         
         static void Main()
         {
-            // Menu.GetStats();
-            Menu.existingGenres = Menu.DownloadGenres($"gameGenres_20260927225625.csv");
-            // Menu.existingFranchises = Menu.DownloadFranchises($"gameFranchises_20260927225625.csv");
-            Console.WriteLine("Welcome to your Video Game Tracker");
+            // CSVHandler.CreateBackups();
+            Menu.GetStats();
+            Console.WriteLine("\n\nWelcome to your Video Game Tracker");
             if (Format.GetClosedAnswer("Would you like to add a new game to the tracker? (y/n)\n"))
             {
                 VideoGame newGame = new VideoGame();
@@ -31,6 +30,36 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine(Menu.existingGenres[i].genreName);
             }
+            
+        }
+
+        public static void HomePage()
+        {
+
+        }
+
+        public static void AddGame()
+        {
+
+        }
+
+        public static void ViewFranchises()
+        {
+
+        }
+
+        public static void SearchGames()
+        {
+
+        }
+
+        public static void GetGeneralGameRecommendation()
+        {
+
+        }
+
+        public static void GetSpecificGameRecommendation()
+        {
             
         }
 

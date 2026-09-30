@@ -32,3 +32,4 @@
 /Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/obj/Debug/net10.0/Tests_and_Experiments.pdb
 /Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/obj/Debug/net10.0/Tests_and_Experiments.genruntimeconfig.cache
 /Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/obj/Debug/net10.0/ref/Tests_and_Experiments.dll
+/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/obj/Debug/net10.0/Tests_and_Experiments.sourcelink.json

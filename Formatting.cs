@@ -1,4 +1,5 @@
 using CsvHelper;
+using System.Globalization;
 
 namespace GameTrackerEx01
 {
@@ -16,7 +17,7 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine($"Your input {input} contains a comma.\nWould you rather:\n1. Have us remove the comma for you\n2. Re-enter the {inputPurpose} yourself");
 
-                int userInput = ConvertStringToInt(Console.ReadLine(), "Would you rather:\n1. Have us remove the comma for you\n2. Re-enter the {inputPurpose} yourself");
+                int userInput = ConvertStringToInt(Console.ReadLine(), $"Would you rather:\n1. Have us remove the comma for you\n2. Re-enter the {inputPurpose} yourself");
 
                 switch (userInput) {
                     case 1 :
@@ -61,6 +62,33 @@ namespace GameTrackerEx01
             Console.WriteLine("Please provide valid float input.");
             ReAskQuestion(question);
             return ConvertStringToFloat(Console.ReadLine(), question);
+        }
+
+        public static float ConvertStringToCost(string input, string question)
+        {
+            if (input.Contains(".") && input.Split(".")[1].Length > 2)
+            {
+                Console.WriteLine($"Input error, {input} has too many decimal places");
+                Console.WriteLine("Please provide an cost convertable input");
+                ReAskQuestion(question);
+                return ConvertStringToCost(Console.ReadLine(), question);
+            }
+            if (float.TryParse(input, out float num))
+            {
+                if (!input.Contains("."))
+                {
+                    input = $"{input}.";
+                }
+                while (input.Contains(".") && input.Split(".")[1].Length < 2)
+                {
+                    input = $"{input}0";
+                }
+                return float.Parse(input);
+            }
+            Console.WriteLine($"Type conversion failed, {input} is not a type: float");
+            Console.WriteLine("Please provide valid cost input.");
+            ReAskQuestion(question);
+            return ConvertStringToCost(Console.ReadLine(), question);
         }
 
 
@@ -152,7 +180,7 @@ namespace GameTrackerEx01
             return answer;
         } 
 
-        static (int num, string err) ConvertStringToIntWithErr(string input)
+        public static (int num, string err) ConvertStringToIntWithErr(string input)
         {
             if (int.TryParse(input, out int num))
             {
@@ -161,5 +189,46 @@ namespace GameTrackerEx01
             //Returning an error message to say the input was not covertible into an Integer type
             return (-1, $"Type conversion failed, {input} is not a type: integer");
         }
+
+
+
+        public static DateTime GetDateValue(string header)
+        {
+            var dateParseResult = ConvertStringToTime(AskForInput(header), "dd/MM/yyyy");
+            while(dateParseResult.err != "")
+            {
+                Console.WriteLine(dateParseResult.err);
+                dateParseResult = ConvertStringToTime(AskForInput(header), "dd/MM/yyyy");
+            }
+            return dateParseResult.time;
+        }
+
+        public static (DateTime time, string err) ConvertStringToTime(string input, string format)
+        {
+            if (DateTime.TryParseExact(input, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime time))
+            {
+                return (time, "");
+            }
+            //Returning an error message to say the input was not covertible into DateTime type
+            return (DateTime.Now, $"Type conversion failed, {input} is not a type: DateTime in format {format}");
+        }
+
+        public static string AskForInput(string header)
+        {
+            Console.WriteLine($"Please enter the {header}:");
+            string detail = Console.ReadLine();
+            if (detail.Contains(","))
+            {
+                detail = CheckForCommas(detail, header);
+            }
+            return detail;
+        }
+
+        public static string ReplaceCommasInString(string commaFilledInput)
+        {
+            return commaFilledInput.Replace(",", "<^&^>");
+        }
+
+        
     }
 }

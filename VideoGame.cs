@@ -3,26 +3,59 @@ using System.Collections.Generic;
 
 namespace GameTrackerEx01
 {
-    class VideoGame
+    public class VideoGame
     {
-        public int gameID;
+        public int gameID {get; set;}
         public string gameName {get; set;}
-        public float avgGameLength;
-        public List<Menu.Genre> gameGenres = [];
-        public bool deckPlayable = false;
-        public bool sessionGame;
-        public bool worthCompletionist;
-        public int franchiseID;
-        public bool played;
+        public float avgGameLength {get; set;}
+        public List<Menu.Genre> gameGenres {get; set;} = [];
+        public bool deckPlayable {get; set;}
+        public bool sessionGame {get; set;}
+        public bool worthCompletionist {get; set;}
+        public int franchiseID {get; set;} = -1;
+        public bool played {get; set;}
 
         public void AddGame()
         {
-            //Assign the gameID
-            // gameID = Menu.GetAndUpdateNextGameID();
-            
             //Get the game's title
             Console.WriteLine("Please input the video game title below");
             gameName = Format.CheckForCommas(Console.ReadLine(), "video game title");
+
+            //Check franchise status
+            if (Format.GetClosedAnswer($"Is {gameName} part of a larger franchise? (y/n)"))
+            {
+                Console.WriteLine($"Please select the franchise {gameName} is a part of:");
+                for (int i = 0; i < Menu.existingFranchises.Count; i++)
+                {
+                    Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
+                }
+                Console.WriteLine($"\n0. If {gameName} is part of an unlisted franchise please press 0\n");
+                int franchiseInput = Format.GetSingleResponse(1, $"Please select the franchise {gameName} is a part of:");
+                if (franchiseInput == 0)
+                {
+                    franchiseID = Menu.AddNewFranchise();
+                } 
+                else 
+                {
+                    franchiseID = Menu.existingFranchises[franchiseInput-1].franchiseID;
+                }
+
+                //Add game to franchise
+                if (franchiseID != -1)
+                {
+                    Menu.AddGameToFranchise(gameID, franchiseID);
+                }
+            }
+
+            GetGameInfo();
+        }
+
+
+        public void GetGameInfo()
+        {
+            //Assign the gameID
+            gameID = Menu.GetAndUpdateNextGameID();
+            
 
             //Get deckPlayable stat
             if (Format.GetClosedAnswer($"Is {gameName} playable on the SteamDeck? (y/n)"))
@@ -84,53 +117,30 @@ namespace GameTrackerEx01
                 worthCompletionist = true;
             }
 
-            //Check franchise status
-            if (Format.GetClosedAnswer($"Is {gameName} part of a larger franchise? (y/n)"))
-            {
-                Console.WriteLine($"Please select the franchise {gameName} is a part of:");
-                for (int i = 0; i < Menu.existingFranchises.Count; i++)
-                {
-                    Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
-                }
-                Console.WriteLine($"\n0. If {gameName} is part of an unlisted franchise please press 0\n");
-                int franchiseInput = Format.GetSingleResponse(1, $"Please select the franchise {gameName} is a part of:");
-                if (franchiseInput == 0)
-                {
-                    franchiseID = Menu.AddNewFranchise();
-                } 
-                else 
-                {
-                    franchiseID = Menu.existingFranchises[franchiseInput-1].franchiseID;
-                }
-
-                //Add game to franchise
-                if (franchiseID != -1)
-                {
-                    Menu.AddGameToFranchise(gameID, franchiseID);
-                }
-                
-                
-            }
-
 
             //Get game played status
             played = Format.GetClosedAnswer($"Have you played {gameName} before? (y/n)");
             if (played) {
                 PlayedGame playedVersion = new PlayedGame();
-                playedVersion.gameID = gameID;
-                playedVersion.gameName = gameName;
-                playedVersion.avgGameLength = avgGameLength;
-                playedVersion.gameGenres = gameGenres;
-                playedVersion.deckPlayable = deckPlayable;
-                playedVersion.franchiseID = franchiseID;
-                playedVersion.sessionGame = sessionGame;
-                playedVersion.worthCompletionist = worthCompletionist;
-                playedVersion.played = true;
-                playedVersion.GetInfo();
+                playedVersion.GrabGameInfo(this);
+                playedVersion.GetPlayInfo();
+            } else {
+                UnplayedGame unplayedVersion = new UnplayedGame();
+                unplayedVersion.GrabGameInfo(this);
+                unplayedVersion.GetUnplayedInfo();
             }
 
             
 
+            
+
+        }
+
+        public void AddGameFromFranchise(string gameTitle, int existingFranchiseID)
+        {
+            gameName = gameTitle;
+            franchiseID = existingFranchiseID;
+            GetGameInfo();
         }
 
         public void UpdateGameLength()
@@ -204,6 +214,19 @@ namespace GameTrackerEx01
             details += "\n";
             details += $"Playable on Deck:  {deckPlayable}\n";
             return details;
+        }
+
+        public void GrabGameInfo(VideoGame parentGame)
+        {
+            gameID = parentGame.gameID;
+            gameName = parentGame.gameName;
+            avgGameLength = parentGame.avgGameLength;
+            gameGenres = parentGame.gameGenres;
+            deckPlayable = parentGame.deckPlayable;
+            sessionGame = parentGame.sessionGame;
+            worthCompletionist = parentGame.worthCompletionist;
+            franchiseID = parentGame.franchiseID;
+            played = parentGame.played;
         }
     }
 }
