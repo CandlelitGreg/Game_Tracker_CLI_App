@@ -1,5 +1,28 @@
+using CsvHelper.Configuration;
+
 namespace GameTrackerEx01
 {
+    public sealed class UnplayedGameMap : ClassMap<UnplayedGame>
+    {
+        public UnplayedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
+            Map(m => m.excitementLevel);
+            Map(m => m.sequel);
+            Map(m => m.previousEntryID);
+            Map(m => m.purchased);
+        }
+    }
+
     public class UnplayedGame : VideoGame
     {
         public int excitementLevel {get; set;}

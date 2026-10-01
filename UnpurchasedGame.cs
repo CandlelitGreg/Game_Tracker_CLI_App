@@ -1,5 +1,57 @@
+using CsvHelper.Configuration;
+
 namespace GameTrackerEx01
 {
+    public sealed class UnpurchasedGameMap : ClassMap<UnpurchasedGame>
+    {
+        public UnpurchasedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
+            Map(m => m.excitementLevel);
+            Map(m => m.sequel);
+            Map(m => m.previousEntryID);
+            Map(m => m.purchased);
+            Map(m => m.fullPrice);
+            Map(m => m.lowestSalePrice);
+            Map(m => m.released);
+            Map(m => m.releaseDate);
+        }
+    }
+
+    public sealed class RetrieveUnpurchasedGameMap : ClassMap<UnpurchasedGame>
+    {
+        public RetrieveUnpurchasedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.excitementLevel);
+            Map(m => m.sequel);
+            Map(m => m.previousEntryID);
+            Map(m => m.purchased);
+            Map(m => m.fullPrice);
+            Map(m => m.lowestSalePrice);
+            Map(m => m.released);
+            Map(m => m.releaseDate);
+        }
+    }
+
     public class UnpurchasedGame : UnplayedGame
     {
         public float fullPrice {get; set;}

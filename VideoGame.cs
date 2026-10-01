@@ -1,25 +1,61 @@
 using System;
 using System.Collections.Generic;
+using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
 {
+    public sealed class VideoGameMap : ClassMap<VideoGame>
+    {
+        public VideoGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
+        }
+    }
+
+
+
     public class VideoGame
     {
         public int gameID {get; set;}
         public string gameName {get; set;}
         public float avgGameLength {get; set;}
-        public List<Menu.Genre> gameGenres {get; set;} = [];
+        public int[] gameGenreIDs {get; set;} = [];
         public bool deckPlayable {get; set;}
         public bool sessionGame {get; set;}
         public bool worthCompletionist {get; set;}
         public int franchiseID {get; set;} = -1;
         public bool played {get; set;}
 
+        public int[] DLCIDs {get;set;} = [];
+
+
         public void AddGame()
         {
             //Get the game's title
             Console.WriteLine("Please input the video game title below");
             gameName = Format.CheckForCommas(Console.ReadLine(), "video game title");
+            VideoGame existenceCheck = Menu.FindGameByTitle(gameName);
+            while (existenceCheck != null)
+            {
+                if (Format.GetClosedAnswer($"{gameName} already exists, do you want to read it's information? (y/n)"))
+                {
+                    existenceCheck.DisplayGameDetails();
+                    return;
+                } else if (Format.GetClosedAnswer($"Would you like to add a different game? (y/n)"))
+                {
+                    gameName = Format.CheckForCommas(Console.ReadLine(), "video game title");
+                    existenceCheck = Menu.FindGameByTitle(gameName);
+                }
+            }
 
             //Check franchise status
             if (Format.GetClosedAnswer($"Is {gameName} part of a larger franchise? (y/n)"))
@@ -86,14 +122,16 @@ namespace GameTrackerEx01
                             {
                                 for (int q = currentGenreCount; q < Menu.existingGenres.Count; q++)
                                 {
-                                    gameGenres.Add(Menu.existingGenres[q]);
+                                    gameGenreIDs = gameGenreIDs.Append(Menu.existingGenres[q].genreID).ToArray();
+                                    Menu.existingGenres[q].AttachGameToGenre(gameID);
                                 }
                             }
                         }
                     } 
                     else 
                     {
-                        gameGenres.Add(Menu.existingGenres[matchingGenres[i]-1]);
+                        gameGenreIDs = gameGenreIDs.Append(Menu.existingGenres[matchingGenres[i]-1].genreID).ToArray();
+                        Menu.existingGenres[matchingGenres[i]-1].AttachGameToGenre(gameID);
                     }
                     
                 }
@@ -183,9 +221,9 @@ namespace GameTrackerEx01
             return avgGameLength;
         }
 
-        public List<Menu.Genre> ReadGenres()
+        public int[] ReadGenres()
         {
-            return gameGenres;
+            return gameGenreIDs;
         }
 
         public bool ReadDeckPlayable()
@@ -203,13 +241,13 @@ namespace GameTrackerEx01
             string details = "";
             details += $"Title:             {gameName}\n";
             details += $"Avg Game Length:   {avgGameLength}\n";
-            if (gameGenres.Count > 0)
+            if (gameGenreIDs.Length > 0)
             {
-                details += $"Game Genres:       {gameGenres[0].genreName}";
+                details += $"Game Genres:       {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[0])].genreName}";
             }
-            for (int i = 1; i < gameGenres.Count; i++)
+            for (int i = 1; i < gameGenreIDs.Length; i++)
             {
-                details += $" || {gameGenres[i].genreName}";
+                details += $" || {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].genreName}";
             }
             details += "\n";
             details += $"Playable on Deck:  {deckPlayable}\n";
@@ -221,12 +259,13 @@ namespace GameTrackerEx01
             gameID = parentGame.gameID;
             gameName = parentGame.gameName;
             avgGameLength = parentGame.avgGameLength;
-            gameGenres = parentGame.gameGenres;
+            gameGenreIDs = parentGame.gameGenreIDs;
             deckPlayable = parentGame.deckPlayable;
             sessionGame = parentGame.sessionGame;
             worthCompletionist = parentGame.worthCompletionist;
             franchiseID = parentGame.franchiseID;
             played = parentGame.played;
+            DLCIDs = parentGame.DLCIDs;
         }
     }
 }

@@ -1,5 +1,74 @@
+using CsvHelper.Configuration;
+
 namespace GameTrackerEx01
 {
+    public sealed class CompletedGameMap : ClassMap<CompletedGame>
+    {
+        public CompletedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
+            Map(m => m.hoursPlayed);
+            Map(m => m.rating);
+            Map(m => m.initialExcitementLevel);
+            Map(m => m.initialImpressions);
+            Map(m => m.nextEntryID);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
+            Map(m => m.mainPlayDevice);
+            Map(m => m.modded);
+            Map(m => m.firstPlayedDate);
+            Map(m => m.completionDate);
+            Map(m => m.review);
+            Map(m => m.wantToPlayAgain);
+            Map(m => m.replaying);
+            Map(m => m.replayID).Convert(args => string.Join(";", args.Value.replayID));
+        }
+    }
+
+    public sealed class RetrieveCompletedGameMap : ClassMap<CompletedGame>
+    {
+        public RetrieveCompletedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.hoursPlayed);
+            Map(m => m.rating);
+            Map(m => m.initialExcitementLevel);
+            Map(m => m.initialImpressions);
+            Map(m => m.nextEntryID);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.logMessages).Convert(args => args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
+            Map(m => m.mainPlayDevice);
+            Map(m => m.modded);
+            Map(m => m.firstPlayedDate);
+            Map(m => m.completionDate);
+            Map(m => m.review);
+            Map(m => m.wantToPlayAgain);
+            Map(m => m.replaying);
+            Map(m => m.replayID).Convert(args => args.Row.GetField("replayID")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+        }
+    }
+
+
     public class CompletedGame : PlayedGame
     {
         public DateOnly firstPlayedDate {get; set;}
@@ -9,10 +78,7 @@ namespace GameTrackerEx01
         public bool replaying {get; set;}
         public int[] replayID {get; set;} //Treat replay as a second gameID but hidden to user, only used to access replay specific information
         
-        //Bring from current game object
-        public string[] logMessages {get; set;}
-        public string mainPlayDevice {get; set;}
-        public bool modded {get; set;}
+        
 
 
         public void GetCompletedGameInfo()

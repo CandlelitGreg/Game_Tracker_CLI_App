@@ -10,15 +10,78 @@ namespace GameTrackerEx01
     {
         public static string settingsPath = "saveFiles/Game_Tracker_Settings_Info.csv";
 
+        public sealed class GenreMap : ClassMap<Genre>
+        {
+            public GenreMap()
+            {
+                Map(m => m.genreID);
+                Map(m => m.genreName);
+                Map(m => m.attachedFranchiseIDs).Convert(args => string.Join(";", args.Value.attachedFranchiseIDs));
+                Map(m => m.attachedGameIDs).Convert(args => string.Join(";", args.Value.attachedGameIDs));
+                Map(m => m.avgGenreRating);
+            }
+        }
+
+        public sealed class RetrieveGenreMap : ClassMap<Genre>
+        {
+            public RetrieveGenreMap()
+            {
+                Map(m => m.genreID);
+                Map(m => m.genreName);
+                Map(m => m.attachedFranchiseIDs).Convert(args => args.Row.GetField("attachedFranchiseIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+                Map(m => m.attachedGameIDs).Convert(args => args.Row.GetField("attachedGameIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+                Map(m => m.avgGenreRating);
+            }
+        }
+
         public class Genre {
+            public int genreID {get;set;}
             public string genreName {get; set;}
+            public int[] attachedFranchiseIDs {get;set;} = [];
+            public int[] attachedGameIDs {get;set;} = [];
+            public float avgGenreRating {get;set;}
+
+            public void AttachFranchiseToGenre(int franchiseID)
+            {
+                attachedFranchiseIDs = attachedFranchiseIDs.Append(franchiseID).ToArray();
+            }
+
+            public void AttachGameToGenre(int gameID)
+            {
+                attachedGameIDs = attachedGameIDs.Append(gameID).ToArray();
+            }
+        }
+
+        public sealed class FranchiseMap : ClassMap<Franchise>
+        {
+            public FranchiseMap()
+            {
+                Map(m => m.franchiseID);
+                Map(m => m.franchiseName);
+                Map(m => m.franchiseEntryIDs).Convert(args => string.Join(";", args.Value.franchiseEntryIDs));
+                Map(m => m.franchiseGenreIDs).Convert(args => string.Join(";", args.Value.franchiseGenreIDs));
+                Map(m => m.avgFranchiseRating);
+            }
+        }
+
+        public sealed class RetrieveFranchiseMap : ClassMap<Franchise>
+        {
+            public RetrieveFranchiseMap()
+            {
+                Map(m => m.franchiseID);
+                Map(m => m.franchiseName);
+                Map(m => m.franchiseEntryIDs).Convert(args => args.Row.GetField("franchiseEntryIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+                Map(m => m.franchiseGenreIDs).Convert(args => args.Row.GetField("franchiseGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+                Map(m => m.avgFranchiseRating);
+            }
         }
         
         public class Franchise {
             public int franchiseID {get; set;}
             public string franchiseName {get; set;}
             public int[] franchiseEntryIDs {get; set;} = [];
-            public List<Genre> franchiseGenres {get; set;} = [];
+            public int[] franchiseGenreIDs {get; set;} = [];
+            public float avgFranchiseRating {get;set;}
         }
 
         public static List<Genre> existingGenres = [];
@@ -36,6 +99,7 @@ namespace GameTrackerEx01
         public class settingsInfo {
             public int nextGameID {get; set;}
             public int nextFranchiseID {get; set;}
+            public int nextGenreID {get;set;}
             public string genreFile {get; set;}
             public string franchiseFile {get; set;}
             public string currentGameFile {get; set;}
@@ -69,6 +133,36 @@ namespace GameTrackerEx01
         {
             using var reader = new StreamReader(filepath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            switch (true)
+            {
+                case var _ when typeof(T) == typeof(CurrentGame):
+                    csv.Context.RegisterClassMap<RetrieveCurrentGameMap>();
+                    break;
+                case var _ when typeof(T) == typeof(DroppedGame):
+                    csv.Context.RegisterClassMap<RetrieveDroppedGameMap>();
+                    break;
+                case var _ when typeof(T) == typeof(CompletedGame):
+                    csv.Context.RegisterClassMap<RetrieveCompletedGameMap>();
+                    break;
+                // case var _ when typeof(T) == typeof(PlayedGame):
+                //     csv.Context.RegisterClassMap<PlayedGameMap>();
+                //     break;
+                case var _ when typeof(T) == typeof(UnpurchasedGame):
+                    csv.Context.RegisterClassMap<RetrieveUnpurchasedGameMap>();
+                    break;
+                case var _ when typeof(T) == typeof(BackloggedGame):
+                    csv.Context.RegisterClassMap<RetrieveBackloggedGameMap>();
+                    break;
+                case var _ when typeof(T) == typeof(Genre):
+                    csv.Context.RegisterClassMap<RetrieveGenreMap>();
+                    break;
+                case var _ when typeof(T) == typeof(Franchise):
+                    csv.Context.RegisterClassMap<RetrieveFranchiseMap>();
+                    break;
+                // case var _ when typeof(T) == typeof(VideoGame):
+                //     csv.Context.RegisterClassMap<VideoGameMap>();
+                //     break;
+            }
             return csv.GetRecords<T>().ToList();
         }
 
@@ -80,12 +174,19 @@ namespace GameTrackerEx01
             return mainFiles.nextGameID - 1;
         }
 
+        public static int GetAndUpdateNextGenreID()
+        {
+            mainFiles.nextGenreID++;
+            backupFiles[backupFiles.Count - 1] = mainFiles;
+            CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
+            return mainFiles.nextGenreID - 1;
+        }
+
         public static void AddNewGenre()
         {
             Console.WriteLine("Please write the name of the new genre below");
             Genre newGenre = new Genre();
 
-            //CURRENTLY NO COMMA CHECK!!!!!!!
             newGenre.genreName = Format.CheckForCommas(Console.ReadLine(), "new genre");
             for (int i = 0; i < existingGenres.Count; i++)
             {
@@ -99,6 +200,7 @@ namespace GameTrackerEx01
                     return;
                 }
             }
+            newGenre.genreID = GetAndUpdateNextGenreID();
             existingGenres.Add(newGenre);
             Console.WriteLine($"{newGenre.genreName} has been added to the existing list of genres");
             if (Format.GetClosedAnswer("Would you like to add another genre? (y/n)"))
@@ -106,6 +208,39 @@ namespace GameTrackerEx01
                 AddNewGenre();
             }
             CSVHandler.UpdateInfoFile<Genre>(existingGenres, mainFiles.genreFile);
+        }
+
+        public static int FindGenre(int searchID)
+        {
+            // if (searchID == existingGenres[existingGenres.Count-1].genreID)
+            // {
+            //     return existingGenres.Count-1;
+            // }
+            int highIndex = existingGenres.Count-1;
+            int lowIndex = 0;
+            int midIndex = lowIndex + ((highIndex - lowIndex) / 2);
+            while (lowIndex < highIndex)
+            {
+                if (existingGenres[midIndex].genreID == searchID)
+                {
+                    return midIndex;
+                }
+                if (existingGenres[midIndex].genreID > searchID)
+                {
+                    lowIndex = midIndex + 1;
+                }
+                else
+                {
+                    highIndex = midIndex - 1;
+                }
+                midIndex = lowIndex + ((highIndex - lowIndex) / 2);
+            }
+            if (existingGenres[highIndex].genreID == searchID)
+            {
+                return highIndex;
+            } else {
+                return lowIndex;
+            }
         }
 
         public static int AddNewFranchise()
@@ -138,9 +273,9 @@ namespace GameTrackerEx01
 
 
             //Get franchise genres
-            if (Menu.existingGenres.Count > 0)
+            if (existingGenres.Count > 0)
             {
-                newFranchise.franchiseGenres = [];
+                newFranchise.franchiseGenreIDs = [];
                 Console.WriteLine($"Please select the appropriate genres for the franchise of {newFranchise.franchiseName}");
                 for (int i = 0; i < existingGenres.Count; i++)
                 {
@@ -149,7 +284,8 @@ namespace GameTrackerEx01
                 int[] matchingGenres = Format.GetManyMenuResponses(existingGenres.Count);
                 for (int i = 0; i < matchingGenres.Length; i++)
                 {
-                    newFranchise.franchiseGenres.Add(Menu.existingGenres[matchingGenres[i]-1]);
+                    newFranchise.franchiseGenreIDs = newFranchise.franchiseGenreIDs.Append(existingGenres[matchingGenres[i]-1].genreID).ToArray();
+                    existingGenres[matchingGenres[i]-1].AttachFranchiseToGenre(newFranchise.franchiseID);
                 }
             }
             
@@ -163,7 +299,8 @@ namespace GameTrackerEx01
                 {
                     for (int i = currentGenreCount; i < existingGenres.Count; i++)
                     {
-                        newFranchise.franchiseGenres.Add(existingGenres[i]);
+                        newFranchise.franchiseGenreIDs = newFranchise.franchiseGenreIDs.Append(existingGenres[i].genreID).ToArray();
+                        existingGenres[i].AttachFranchiseToGenre(newFranchise.franchiseID);
                     }
                 }
             }
@@ -177,7 +314,7 @@ namespace GameTrackerEx01
         {
             int franchiseIndex = FindFranchise(franchiseID);
             existingFranchises[franchiseIndex].franchiseEntryIDs = existingFranchises[franchiseIndex].franchiseEntryIDs.Append(gameId).ToArray();
-            CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, $"gameFranchises_20260927225625.csv");
+            CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, mainFiles.franchiseFile);
         }
 
         public static int FindFranchise(int searchID)
@@ -231,12 +368,12 @@ namespace GameTrackerEx01
                 }
                 midIndex = lowIndex + ((highIndex - lowIndex) / 2);
             }
-            if (existingVideoGames[highIndex].gameID == searchID)
-            {
-                return existingVideoGames[highIndex];
-            } else if (existingVideoGames[lowIndex].gameID == searchID)
+            if (existingVideoGames[lowIndex].gameID == searchID)
             {
                 return existingVideoGames[lowIndex];
+            } else if (existingVideoGames[highIndex].gameID == searchID)
+            {
+                return existingVideoGames[highIndex];
             } else {
                 return null;
             }

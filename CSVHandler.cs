@@ -33,34 +33,50 @@ namespace GameTrackerEx01
 
         }
 
-        // public static void UpdateGenreFile(List<Menu.Genre> genres, string filepath)
-        // {
-        //     using var writer = new StreamWriter(filepath);
-        //     using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        //     csv.WriteRecords(genres);
-        // }
-        // //ABOVE AND BELOW FUNCS CAN BE COMBINED INTO A TYPE T FUNC - Could then also use same func for all game files
-        // public static void UpdateFranchiseFile(List<Menu.Franchise> franchises, string filepath)
-        // {
-        //     using var writer = new StreamWriter(filepath);
-        //     using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        //     csv.WriteRecords(franchises);
-        // }
-
         public static void UpdateInfoFile<T>(List<T> infoData, string filepath)
         {
             using var writer = new StreamWriter(filepath);
             using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            //Use typeof(T) for switch case to determine what map to use
+            switch (infoData)
+            {
+                case CurrentGame:
+                    csv.Context.RegisterClassMap<CurrentGameMap>();
+                    break;
+                case DroppedGame:
+                    csv.Context.RegisterClassMap<DroppedGameMap>();
+                    break;
+                case List<CompletedGame>:
+                    csv.Context.RegisterClassMap<CompletedGameMap>();
+                    break;
+                // case List<PlayedGame>:
+                //     csv.Context.RegisterClassMap<PlayedGameMap>();
+                //     break;
+                case UnpurchasedGame:
+                    csv.Context.RegisterClassMap<UnpurchasedGameMap>();
+                    break;
+                case BackloggedGame:
+                    csv.Context.RegisterClassMap<BackloggedGameMap>();
+                    break;
+                case List<Menu.Genre>:
+                    csv.Context.RegisterClassMap<Menu.GenreMap>();
+                    break;
+                case List<Menu.Franchise>:
+                    csv.Context.RegisterClassMap<Menu.FranchiseMap>();
+                    break;
+                // case List<VideoGame>:
+                //     csv.Context.RegisterClassMap<VideoGameMap>();
+                //     break;
+            }
             csv.WriteRecords(infoData);
         }
 
         public static void CreateBackups()
         {
             Menu.settingsInfo newSettingsInfo = new Menu.settingsInfo();
-            // newSettingsInfo.nextGameID = Menu.mainFiles.nextGameID;
-            // newSettingsInfo.nextFranchiseID = Menu.mainFiles.nextFranchiseID;
-            newSettingsInfo.nextGameID = 0;
-            newSettingsInfo.nextFranchiseID = 0;
+            newSettingsInfo.nextGameID = 0;//Menu.mainFiles.nextGameID;
+            newSettingsInfo.nextFranchiseID = 0;//Menu.mainFiles.nextFranchiseID;
+            newSettingsInfo.nextGenreID = 0;//Menu.mainFiles.nextGenreID;
             newSettingsInfo.genreFile = $"saveFiles/gameGenres_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.franchiseFile = $"saveFiles/gameFranchises_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.currentGameFile = $"saveFiles/currentGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";

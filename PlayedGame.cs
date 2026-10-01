@@ -1,5 +1,36 @@
+using CsvHelper.Configuration;
+
 namespace GameTrackerEx01
 {
+
+    public sealed class PlayedGameMap : ClassMap<PlayedGame>
+    {
+        public PlayedGameMap()
+        {
+            Map(m => m.gameID);
+            Map(m => m.gameName);
+            Map(m => m.avgGameLength);
+            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
+            Map(m => m.deckPlayable);
+            Map(m => m.sessionGame);
+            Map(m => m.worthCompletionist);
+            Map(m => m.franchiseID);
+            Map(m => m.played);
+            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
+            Map(m => m.hoursPlayed);
+            Map(m => m.rating);
+            Map(m => m.initialExcitementLevel);
+            Map(m => m.initialImpressions);
+            Map(m => m.nextEntryID);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
+            Map(m => m.mainPlayDevice);
+            Map(m => m.modded);
+        }
+    }
+
+
     public class PlayedGame : VideoGame
     {
         public float hoursPlayed {get; set;}
@@ -9,6 +40,10 @@ namespace GameTrackerEx01
         public int nextEntryID {get; set;} = -1;
         public bool completed {get; set;}
         public bool playing {get; set;}
+
+        public string[] logMessages {get; set;}
+        public string mainPlayDevice {get; set;}
+        public bool modded {get; set;}
 
         public void GetPlayInfo()
         {
@@ -167,8 +202,13 @@ namespace GameTrackerEx01
             rating = parentGame.rating;
             initialExcitementLevel = parentGame.initialExcitementLevel;
             initialImpressions = parentGame.initialImpressions;
+            nextEntryID = parentGame.nextEntryID;
             completed = parentGame.completed;
             playing = parentGame.playing;
+
+            logMessages = parentGame.logMessages;
+            modded = parentGame.modded;
+            mainPlayDevice = parentGame.mainPlayDevice;
         }
     }
 }
