@@ -1,0 +1,4 @@
+gameID,gameName,avgGameLength,gameGenreIDs,deckPlayable,sessionGame,worthCompletionist,franchiseID,played,purchased,completed,playing,DLCIDs,excitementLevel,sequel,previousEntryID,purchaseDate
+0,Doom Eternal,15,0;1;2;3,True,False,False,0,False,True,False,False,,8,True,1,01/01/2001
+3,Assassin's Creed: Brotherhood,15,4;5;6;7,True,False,False,1,False,True,False,False,,7,True,2,01/01/2001
+4,Resident Evil 4,16,2;8;9,True,False,True,2,False,True,False,False,,8,True,5,01/01/2025

@@ -15,11 +15,13 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
             Map(m => m.excitementLevel);
             Map(m => m.sequel);
             Map(m => m.previousEntryID);
-            Map(m => m.purchased);
             Map(m => m.fullPrice);
             Map(m => m.lowestSalePrice);
             Map(m => m.released);
@@ -34,17 +36,19 @@ namespace GameTrackerEx01
             Map(m => m.gameID);
             Map(m => m.gameName);
             Map(m => m.avgGameLength);
-            Map(m => m.gameGenreIDs).Convert(args => args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.gameGenreIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("gameGenreIDs")) ? Array.Empty<int>() : args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.deckPlayable);
             Map(m => m.sessionGame);
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
-            Map(m => m.DLCIDs).Convert(args => args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.DLCIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("DLCIDs")) ? Array.Empty<int>() : args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.excitementLevel);
             Map(m => m.sequel);
             Map(m => m.previousEntryID);
-            Map(m => m.purchased);
             Map(m => m.fullPrice);
             Map(m => m.lowestSalePrice);
             Map(m => m.released);
@@ -81,7 +85,8 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingUnpurchasedGames.Add(this);
-            CSVHandler.UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, Menu.mainFiles.unpurchasedGameFile);
+            Menu.existingVideoGames.Add(this);
+            SaveGameInfo();
         }
 
         public void EditFullPrice()
@@ -108,6 +113,11 @@ namespace GameTrackerEx01
             //Get Backlogged Data
 
             //Remove this object
+        }
+
+        public void SaveGameInfo()
+        {
+            CSVHandler.UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, Menu.mainFiles.unpurchasedGameFile);
         }
     }
 }

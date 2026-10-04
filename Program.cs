@@ -12,7 +12,7 @@ namespace GameTrackerEx01
         
         static void Main()
         {
-            CSVHandler.CreateBackups();
+            // CSVHandler.CreateRefresh();
             Menu.GetStats();
             Console.WriteLine("\n\nWelcome to your Video Game Tracker");
             if (Format.GetClosedAnswer("Would you like to add a new game to the tracker? (y/n)\n"))

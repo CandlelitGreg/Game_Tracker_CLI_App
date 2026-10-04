@@ -155,6 +155,7 @@ namespace GameTrackerEx01
 
         public static int GetSingleResponse(int optionCount, string question)
         {
+            Console.WriteLine($"There are {optionCount} options available");
             int input = ConvertStringToInt(Console.ReadLine(), question);
             while (input > optionCount || input < 0)
             {

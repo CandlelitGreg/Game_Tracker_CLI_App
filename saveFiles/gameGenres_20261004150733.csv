@@ -1,0 +1,17 @@
+genreID,genreName,attachedFranchiseIDs,attachedGameIDs,avgGenreRating,avgGenreLength,avgGenrePlaytime,avgGenreExcitement
+0,FPS,0,0;1,0,0,0,0
+1,Fast Paced,0,0;1,0,0,0,0
+2,Gore,0;2,0;1;4;5,0,0,0,0
+3,Action,0,0;1,0,0,0,0
+4,Open World,1;3,2;3;6;7;8;9;10;11;12,0,0,0,0
+5,Parkour,1,2;3,0,0,0,0
+6,Stealth,1,2;3,0,0,0,0
+7,Historical,1,2;3,0,0,0,0
+8,Horror,2,4;5,0,0,0,0
+9,3rd person shooter,2,4;5,0,0,0,0
+10,Magic,,7,0,0,0,0
+11,Mythical,,7,0,0,0,0
+12,Fantasy,,7,0,0,0,0
+13,Driving,3,8;9;10;11;12,0,0,0,0
+14,Racing,3,8;9;10;11;12,0,0,0,0
+15,Collectathon,,10;11;12,0,0,0,0

@@ -16,14 +16,15 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
             Map(m => m.hoursPlayed);
             Map(m => m.rating);
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.completed);
-            Map(m => m.playing);
             Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -38,10 +39,8 @@ namespace GameTrackerEx01
         public int initialExcitementLevel {get; set;}
         public string initialImpressions {get; set;} //Contains comma replaced format
         public int nextEntryID {get; set;} = -1;
-        public bool completed {get; set;}
-        public bool playing {get; set;}
 
-        public string[] logMessages {get; set;}
+        public string[] logMessages {get; set;} = [];
         public string mainPlayDevice {get; set;}
         public bool modded {get; set;}
 
@@ -73,12 +72,6 @@ namespace GameTrackerEx01
             //Get initial impressions
             Console.WriteLine($"What were your inital impressions and thoughts after your first play session of {gameName}?");
             initialImpressions = Format.ReplaceCommasInString(Console.ReadLine());
-
-            //Get sequel info
-            if (franchiseID != -1 && Format.GetClosedAnswer($"Is there a game following {gameName} in the franchise of {Menu.existingFranchises[Menu.FindFranchise(franchiseID)].franchiseName}? (y/n)"))
-            {
-                nextEntryID = GetSequelStatus();
-            }
             
             //Check completed status
             completed = Format.GetClosedAnswer($"Have you completed {gameName}? (y/n)");
@@ -87,17 +80,40 @@ namespace GameTrackerEx01
                 CompletedGame completedVersion = new CompletedGame();
                 completedVersion.GrabPlayedGameInfo(this);
                 completedVersion.GetCompletedGameInfo();
+                //Get sequel info
+                if (franchiseID != -1 && Format.GetClosedAnswer($"Is there a game following {gameName} in the franchise of {Menu.existingFranchises[Menu.FindFranchise(franchiseID)].franchiseName}? (y/n)"))
+                {
+                    nextEntryID = GetSequelStatus();
+                    completedVersion.nextEntryID = nextEntryID;
+                    completedVersion.SaveGameInfo();
+                }
             } else if (Format.GetClosedAnswer($"Are you currently playing {gameName}? (y/n)"))
             {
                 playing = true;
                 CurrentGame currentVersion = new CurrentGame();
                 currentVersion.GrabPlayedGameInfo(this);
                 currentVersion.GetCurrentGameInfo();
+                //Get sequel info
+                if (franchiseID != -1 && Format.GetClosedAnswer($"Is there a game following {gameName} in the franchise of {Menu.existingFranchises[Menu.FindFranchise(franchiseID)].franchiseName}? (y/n)"))
+                {
+                    nextEntryID = GetSequelStatus();
+                    currentVersion.nextEntryID = nextEntryID;
+                    currentVersion.SaveGameInfo();
+                }
             } else {
                 DroppedGame droppedVersion = new DroppedGame();
                 droppedVersion.GrabPlayedGameInfo(this);
                 droppedVersion.GetDroppedGameInfo();
+                //Get sequel info
+                if (franchiseID != -1 && Format.GetClosedAnswer($"Is there a game following {gameName} in the franchise of {Menu.existingFranchises[Menu.FindFranchise(franchiseID)].franchiseName}? (y/n)"))
+                {
+                    nextEntryID = GetSequelStatus();
+                    droppedVersion.nextEntryID = nextEntryID;
+                    droppedVersion.SaveGameInfo();
+                }
             }
+
+            
 
 
             
@@ -110,11 +126,14 @@ namespace GameTrackerEx01
             Menu.Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
             Console.WriteLine($"Please input the name of the game after {gameName} in the franchise of {gameFranchise.franchiseName}.");
             string followingEntry = Format.CheckForCommas(Console.ReadLine(), $"title for the sequel to {gameName}");
-            for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
+            if (gameFranchise.franchiseEntryIDs.Length > 1)
             {
-                if (followingEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    return gameFranchise.franchiseEntryIDs[i];
+                    if (followingEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                    {
+                        return gameFranchise.franchiseEntryIDs[i];
+                    }
                 }
             }
             if (nextEntryID == -1)

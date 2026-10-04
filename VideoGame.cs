@@ -17,6 +17,9 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
         }
     }
@@ -25,7 +28,7 @@ namespace GameTrackerEx01
 
     public class VideoGame
     {
-        public int gameID {get; set;}
+        public int gameID {get; set;} = -1;
         public string gameName {get; set;}
         public float avgGameLength {get; set;}
         public int[] gameGenreIDs {get; set;} = [];
@@ -34,12 +37,17 @@ namespace GameTrackerEx01
         public bool worthCompletionist {get; set;}
         public int franchiseID {get; set;} = -1;
         public bool played {get; set;}
+        public bool purchased {get; set;}
+        public bool completed {get; set;}
+        public bool playing {get; set;}
 
         public int[] DLCIDs {get;set;} = [];
 
 
         public void AddGame()
         {
+            //Assign the gameID
+            gameID = Menu.GetAndUpdateNextGameID();
             //Get the game's title
             Console.WriteLine("Please input the video game title below");
             gameName = Format.CheckForCommas(Console.ReadLine(), "video game title");
@@ -66,7 +74,7 @@ namespace GameTrackerEx01
                     Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
                 }
                 Console.WriteLine($"\n0. If {gameName} is part of an unlisted franchise please press 0\n");
-                int franchiseInput = Format.GetSingleResponse(1, $"Please select the franchise {gameName} is a part of:");
+                int franchiseInput = Format.GetSingleResponse(Menu.existingFranchises.Count + 1, $"Please select the franchise {gameName} is a part of:");
                 if (franchiseInput == 0)
                 {
                     franchiseID = Menu.AddNewFranchise();
@@ -89,8 +97,10 @@ namespace GameTrackerEx01
 
         public void GetGameInfo()
         {
-            //Assign the gameID
-            gameID = Menu.GetAndUpdateNextGameID();
+            if (gameID == -1)
+            {
+                gameID = Menu.GetAndUpdateNextGameID();
+            }
             
 
             //Get deckPlayable stat
@@ -137,6 +147,8 @@ namespace GameTrackerEx01
                 }
             }
 
+            //TODO: Add the option to add a new genre after picking existing genres
+
             
 
             //Get average completion time
@@ -176,6 +188,7 @@ namespace GameTrackerEx01
 
         public void AddGameFromFranchise(string gameTitle, int existingFranchiseID)
         {
+            //Add the game sequel or prequel to the game automatically
             gameName = gameTitle;
             franchiseID = existingFranchiseID;
             GetGameInfo();
@@ -201,7 +214,7 @@ namespace GameTrackerEx01
 
         }
 
-        public void addGenres()
+        public void AddGenres()
         {
 
         }
@@ -241,15 +254,20 @@ namespace GameTrackerEx01
             string details = "";
             details += $"Title:             {gameName}\n";
             details += $"Avg Game Length:   {avgGameLength}\n";
-            if (gameGenreIDs.Length > 0)
+            if (gameGenreIDs.Length >= 1)
             {
+                //Console.WriteLine($"Check 1 - Length:{gameGenreIDs.Length} - Array: {string.Join(",", gameGenreIDs)} - Error Value: {gameGenreIDs[0]}");
                 details += $"Game Genres:       {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[0])].genreName}";
-            }
-            for (int i = 1; i < gameGenreIDs.Length; i++)
+                //Console.WriteLine("Check 2");
+                for (int i = 1; i < gameGenreIDs.Length; i++)
+                {
+                    details += $" || {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].genreName}";
+                }
+                details += "\n";
+            } else
             {
-                details += $" || {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].genreName}";
+                details += $"Game Genres:       None\n";
             }
-            details += "\n";
             details += $"Playable on Deck:  {deckPlayable}\n";
             return details;
         }

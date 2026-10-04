@@ -15,11 +15,13 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
             Map(m => m.excitementLevel);
             Map(m => m.sequel);
             Map(m => m.previousEntryID);
-            Map(m => m.purchased);
         }
     }
 
@@ -28,7 +30,6 @@ namespace GameTrackerEx01
         public int excitementLevel {get; set;}
         public bool sequel {get; set;}
         public int previousEntryID {get; set;} = -1;
-        public bool purchased {get; set;}
 
         public void GetUnplayedInfo()
         {
@@ -41,13 +42,13 @@ namespace GameTrackerEx01
                 excitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"How would you rate your current excitement for {gameName} on a scale from 1-10? (1: Horrible, 10: Amazing)");
             }
 
-            //Get sequel status
-            if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
-            {
-                sequel = true;
-                previousEntryID = GetSequelStatus();
-                if (previousEntryID == -1) sequel = false;
-            }
+            // //Get sequel status
+            // if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
+            // {
+            //     sequel = true;
+            //     previousEntryID = GetPrequelStatus();
+            //     if (previousEntryID == -1) sequel = false;
+            // }
 
             //Get purchased status
             if (Format.GetClosedAnswer($"Do you already own {gameName}? (y/n)"))
@@ -56,23 +57,46 @@ namespace GameTrackerEx01
                 BackloggedGame backloggedVersion = new BackloggedGame();
                 backloggedVersion.GrabUnplayedInfo(this);
                 backloggedVersion.GetBackloggedGameInfo();
+                //Get sequel status
+                if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
+                {
+                    sequel = true;
+                    previousEntryID = GetPrequelStatus();
+                    if (previousEntryID == -1) sequel = false;
+                    backloggedVersion.previousEntryID = previousEntryID;
+                    backloggedVersion.sequel = sequel;
+                    backloggedVersion.SaveGameInfo();
+                }
             } else {
                 UnpurchasedGame unpurchasedVersion = new UnpurchasedGame();
                 unpurchasedVersion.GrabUnplayedInfo(this);
                 unpurchasedVersion.GetUnpurchasedGameInfo();
+                //Get sequel status
+                if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
+                {
+                    sequel = true;
+                    previousEntryID = GetPrequelStatus();
+                    if (previousEntryID == -1) sequel = false;
+                    unpurchasedVersion.previousEntryID = previousEntryID;
+                    unpurchasedVersion.sequel = sequel;
+                    unpurchasedVersion.SaveGameInfo();
+                }
             }
         }
 
-        public int GetSequelStatus()
+        public int GetPrequelStatus()
         {
             Menu.Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
             Console.WriteLine($"Please input the name of the game preceeding {gameName} in the franchise of {gameFranchise.franchiseName}.");
             string previousEntry = Format.CheckForCommas(Console.ReadLine(), "previous franchise entry");
-            for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
+            if (gameFranchise.franchiseEntryIDs.Length > 1)
             {
-                if (previousEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    return gameFranchise.franchiseEntryIDs[i];
+                    if (previousEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                    {
+                        return gameFranchise.franchiseEntryIDs[i];
+                    }
                 }
             }
             if (previousEntryID == -1)
@@ -90,7 +114,7 @@ namespace GameTrackerEx01
                     } else {
                         if (Format.GetClosedAnswer($"Would you like to try find the game preceeding {gameName} again? (y/n)"))
                         {
-                            return GetSequelStatus();
+                            return GetPrequelStatus();
                         } else {
                             return -1;
                         }

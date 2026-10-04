@@ -40,10 +40,10 @@ namespace GameTrackerEx01
             //Use typeof(T) for switch case to determine what map to use
             switch (infoData)
             {
-                case CurrentGame:
+                case List<CurrentGame>:
                     csv.Context.RegisterClassMap<CurrentGameMap>();
                     break;
-                case DroppedGame:
+                case List<DroppedGame>:
                     csv.Context.RegisterClassMap<DroppedGameMap>();
                     break;
                 case List<CompletedGame>:
@@ -52,10 +52,10 @@ namespace GameTrackerEx01
                 // case List<PlayedGame>:
                 //     csv.Context.RegisterClassMap<PlayedGameMap>();
                 //     break;
-                case UnpurchasedGame:
+                case List<UnpurchasedGame>:
                     csv.Context.RegisterClassMap<UnpurchasedGameMap>();
                     break;
-                case BackloggedGame:
+                case List<BackloggedGame>:
                     csv.Context.RegisterClassMap<BackloggedGameMap>();
                     break;
                 case List<Menu.Genre>:
@@ -72,6 +72,35 @@ namespace GameTrackerEx01
         }
 
         public static void CreateBackups()
+        {
+            Menu.settingsInfo newSettingsInfo = new Menu.settingsInfo();
+            newSettingsInfo.nextGameID = Menu.mainFiles.nextGameID;
+            newSettingsInfo.nextFranchiseID = Menu.mainFiles.nextFranchiseID;
+            newSettingsInfo.nextGenreID = Menu.mainFiles.nextGenreID;
+            newSettingsInfo.genreFile = $"saveFiles/gameGenres_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.franchiseFile = $"saveFiles/gameFranchises_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.currentGameFile = $"saveFiles/currentGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.completedGameFile = $"saveFiles/completedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.droppedGameFile = $"saveFiles/droppedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.unpurchasedGameFile = $"saveFiles/unpurchasedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+            newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
+
+
+            UpdateInfoFile<Menu.Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
+            UpdateInfoFile<Menu.Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
+            UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);
+            UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, newSettingsInfo.completedGameFile);
+            UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, newSettingsInfo.droppedGameFile);
+            UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, newSettingsInfo.unpurchasedGameFile);
+            UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, newSettingsInfo.backloggedGameFile);
+
+            Menu.backupFiles.Add(newSettingsInfo);
+            Menu.mainFiles = newSettingsInfo;
+
+            UpdateInfoFile<Menu.settingsInfo>(Menu.backupFiles, Menu.settingsPath);
+        }
+
+        public static void CreateRefresh()
         {
             Menu.settingsInfo newSettingsInfo = new Menu.settingsInfo();
             newSettingsInfo.nextGameID = 0;//Menu.mainFiles.nextGameID;

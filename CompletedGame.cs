@@ -15,14 +15,15 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
             Map(m => m.hoursPlayed);
             Map(m => m.rating);
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.completed);
-            Map(m => m.playing);
             Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -42,21 +43,22 @@ namespace GameTrackerEx01
             Map(m => m.gameID);
             Map(m => m.gameName);
             Map(m => m.avgGameLength);
-            Map(m => m.gameGenreIDs).Convert(args => args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.gameGenreIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("gameGenreIDs")) ? Array.Empty<int>() : args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.deckPlayable);
             Map(m => m.sessionGame);
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
-            Map(m => m.DLCIDs).Convert(args => args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.DLCIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("DLCIDs")) ? Array.Empty<int>() : args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.hoursPlayed);
             Map(m => m.rating);
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.completed);
-            Map(m => m.playing);
-            Map(m => m.logMessages).Convert(args => args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
+            Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
             Map(m => m.firstPlayedDate);
@@ -64,7 +66,7 @@ namespace GameTrackerEx01
             Map(m => m.review);
             Map(m => m.wantToPlayAgain);
             Map(m => m.replaying);
-            Map(m => m.replayID).Convert(args => args.Row.GetField("replayID")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.replayID).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("replayID")) ? Array.Empty<int>() : args.Row.GetField("replayID")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
         }
     }
 
@@ -76,7 +78,7 @@ namespace GameTrackerEx01
         public string review {get; set;}
         public bool wantToPlayAgain {get; set;}
         public bool replaying {get; set;}
-        public int[] replayID {get; set;} //Treat replay as a second gameID but hidden to user, only used to access replay specific information
+        public int[] replayID {get; set;} = []; //Treat replay as a second gameID but hidden to user, only used to access replay specific information
         
         
 
@@ -106,7 +108,8 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingCompletedGames.Add(this);
-            CSVHandler.UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, Menu.mainFiles.completedGameFile);
+            Menu.existingVideoGames.Add(this);
+            SaveGameInfo();
         }
 
         public void InitiateReplay()
@@ -132,6 +135,11 @@ namespace GameTrackerEx01
             Console.WriteLine($"Please enter your review for {gameName}:");
             return Console.ReadLine();
             //TODO: build this out to be a multi-line reading func
+        }
+
+        public void SaveGameInfo()
+        {
+            CSVHandler.UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, Menu.mainFiles.completedGameFile);
         }
     }
 }

@@ -15,14 +15,15 @@ namespace GameTrackerEx01
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
             Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
             Map(m => m.hoursPlayed);
             Map(m => m.rating);
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.completed);
-            Map(m => m.playing);
             Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -41,21 +42,22 @@ namespace GameTrackerEx01
             Map(m => m.gameID);
             Map(m => m.gameName);
             Map(m => m.avgGameLength);
-            Map(m => m.gameGenreIDs).Convert(args => args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.gameGenreIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("gameGenreIDs")) ? Array.Empty<int>() : args.Row.GetField("gameGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.deckPlayable);
             Map(m => m.sessionGame);
             Map(m => m.worthCompletionist);
             Map(m => m.franchiseID);
             Map(m => m.played);
-            Map(m => m.DLCIDs).Convert(args => args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
+            Map(m => m.purchased);
+            Map(m => m.completed);
+            Map(m => m.playing);
+            Map(m => m.DLCIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("DLCIDs")) ? Array.Empty<int>() : args.Row.GetField("DLCIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.hoursPlayed);
             Map(m => m.rating);
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.completed);
-            Map(m => m.playing);
-            Map(m => m.logMessages).Convert(args => args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
+            Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
             Map(m => m.lastPlayed);
@@ -111,7 +113,8 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingCurrentGames.Add(this);
-            CSVHandler.UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
+            Menu.existingVideoGames.Add(this);
+            SaveGameInfo();
 
         }
 
@@ -135,6 +138,11 @@ namespace GameTrackerEx01
             //Get Completed game info
 
             //remove this object
+        }
+
+        public void SaveGameInfo()
+        {
+            CSVHandler.UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
         }
     }
 }
