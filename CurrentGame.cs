@@ -113,7 +113,7 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingCurrentGames.Add(this);
-            Menu.existingVideoGames.Add(this);
+            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
 
         }
@@ -140,9 +140,26 @@ namespace GameTrackerEx01
             //remove this object
         }
 
+        public string DisplayCurrentGameInfo()
+        {
+            string currentGameInfo = DisplayPlayedInfo();
+            currentGameInfo += 
+                               $"First Played: {firstPlayedDate.ToString("dd/MM/yyyy")}\n" +
+                               $"Last Played: {lastPlayed.ToString("dd/MM/yyyy")}\n" +
+                               $"Previously Dropped: {(previouslyDropped ? "Yes" : "No")}\n";
+            return currentGameInfo;
+        }
+
         public void SaveGameInfo()
         {
             CSVHandler.UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
+            if (Menu.FindGameByID(gameID) != null)
+            {
+                Menu.UpdateGameByID(this);
+            } else
+            {
+                Menu.existingVideoGames.Add(this);
+            }
         }
     }
 }

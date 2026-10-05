@@ -93,7 +93,14 @@ namespace GameTrackerEx01
             {
                 for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    if (previousEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                    Console.WriteLine($"franchiseEntryIDs should have {gameFranchise.franchiseEntryIDs.Length} entries, and the current index is {i} and the current gameID is {gameFranchise.franchiseEntryIDs[i]}");
+                    if (Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]) == null)
+                    {
+                        Console.WriteLine($"Game with ID {gameFranchise.franchiseEntryIDs[i]} could not be found in our records.");
+                    }
+                    Console.WriteLine($"Comparing {previousEntry.ToLower()} to {Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower()}");
+                    string nextIDName = Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower();
+                    if (previousEntry.ToLower() == nextIDName)
                     {
                         return gameFranchise.franchiseEntryIDs[i];
                     }
@@ -180,6 +187,19 @@ namespace GameTrackerEx01
             //get currentgame info
 
             //remove this object
+        }
+
+        public string DisplayUnplayedGameInfo()
+        {
+            string unplayedGameInfo = $"Excitement Level:  {excitementLevel}\n";
+            if (sequel)
+            {
+                unplayedGameInfo += $"Sequel to:         {Menu.FindGameByID(previousEntryID).gameName}\n";
+            } else
+            {
+                unplayedGameInfo += $"No relevant previous entry\n";
+            }
+            return unplayedGameInfo;
         }
     }
 }

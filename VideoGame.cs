@@ -180,8 +180,7 @@ namespace GameTrackerEx01
                 unplayedVersion.GetUnplayedInfo();
             }
 
-            
-
+            Menu.existingVideoGames.Add(this);
             
 
         }
@@ -189,8 +188,10 @@ namespace GameTrackerEx01
         public void AddGameFromFranchise(string gameTitle, int existingFranchiseID)
         {
             //Add the game sequel or prequel to the game automatically
+            gameID = Menu.GetAndUpdateNextGameID();
             gameName = gameTitle;
             franchiseID = existingFranchiseID;
+            Menu.AddGameToFranchise(gameID, franchiseID);
             GetGameInfo();
         }
 
@@ -249,6 +250,34 @@ namespace GameTrackerEx01
             return played;
         }
 
+        public void OpenGameDetails()
+        {
+            Console.WriteLine($"What would you like to do with {gameName}?\n");
+            Console.WriteLine("1. View game details");
+            Console.WriteLine("2. Edit game details");
+            Console.WriteLine("3. View similar games");
+            int userInput = Format.GetSingleResponse(3, $"What would you like to do with {gameName}?");
+            switch (userInput)
+            {
+                case 1:
+                    Console.WriteLine(DisplayGameDetails());
+                    break;
+                case 2:
+                    //Add functionality to edit game details
+                    // EditGameDetails();
+                    break;
+                case 3:
+                    //Add functionality to view similar games
+                    // ViewSimilarGames();
+                    break;
+            }
+            if (Format.GetClosedAnswer($"Do you want to keep interacting with {gameName}? (y/n)"))
+            {
+                OpenGameDetails();
+            }
+            return;
+        }
+
         public string DisplayGameDetails()
         {
             string details = "";
@@ -256,9 +285,7 @@ namespace GameTrackerEx01
             details += $"Avg Game Length:   {avgGameLength}\n";
             if (gameGenreIDs.Length >= 1)
             {
-                //Console.WriteLine($"Check 1 - Length:{gameGenreIDs.Length} - Array: {string.Join(",", gameGenreIDs)} - Error Value: {gameGenreIDs[0]}");
                 details += $"Game Genres:       {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[0])].genreName}";
-                //Console.WriteLine("Check 2");
                 for (int i = 1; i < gameGenreIDs.Length; i++)
                 {
                     details += $" || {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].genreName}";
@@ -269,6 +296,35 @@ namespace GameTrackerEx01
                 details += $"Game Genres:       None\n";
             }
             details += $"Playable on Deck:  {deckPlayable}\n";
+            if (played)
+            {
+                if (!completed && !playing)
+                {
+                    details += $"Played Status:     Dropped\n";
+                    details +=Menu.FindDetailedGameByID<DroppedGame>(gameID).DisplayDroppedGameInfo();
+                }
+            } else
+            {
+                if (purchased)
+                {
+                    details += $"Played Status:     Backlogged\n";
+                    details += Menu.FindDetailedGameByID<BackloggedGame>(gameID).DisplayBackloggedGameInfo();
+                } else
+                {
+                    details += $"Played Status:     Unpurchased\n";
+                    details += Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).DisplayUnpurchasedGameInfo();
+                }
+            }
+            if (completed)
+            {
+                details += $"Played Status:     Completed\n";
+                details += Menu.FindDetailedGameByID<CompletedGame>(gameID).DisplayCompletedGameInfo();
+            }
+            if (playing)
+            {
+                details += $"Played Status:     Currently Playing\n";
+                details += Menu.FindDetailedGameByID<CurrentGame>(gameID).DisplayCurrentGameInfo();
+            }
             return details;
         }
 

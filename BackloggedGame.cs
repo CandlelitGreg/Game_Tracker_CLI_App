@@ -62,13 +62,27 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingBackloggedGames.Add(this);
-            Menu.existingVideoGames.Add(this);
+            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
+        }
+
+        public string DisplayBackloggedGameInfo()
+        {
+            string backloggedGameInfo = DisplayUnplayedGameInfo() +
+                                    $"Purchase Date:     {purchaseDate.ToString("dd/MM/yyyy")}\n";
+            return backloggedGameInfo;
         }
 
         public void SaveGameInfo()
         {
             CSVHandler.UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, Menu.mainFiles.backloggedGameFile);
+            if (Menu.FindGameByID(gameID) != null)
+            {
+                Menu.UpdateGameByID(this);
+            } else
+            {
+                Menu.existingVideoGames.Add(this);
+            }
         }
     }
 }

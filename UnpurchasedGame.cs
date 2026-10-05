@@ -85,7 +85,7 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingUnpurchasedGames.Add(this);
-            Menu.existingVideoGames.Add(this);
+            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
         }
 
@@ -115,9 +115,29 @@ namespace GameTrackerEx01
             //Remove this object
         }
 
+        public string DisplayUnpurchasedGameInfo()
+        {
+            string unpurchasedGameInfo = DisplayUnplayedGameInfo() +
+                                       $"Full Price:        {fullPrice}\n" +
+                                       $"Lowest Sale Price: {lowestSalePrice}\n" +
+                                       $"Released:          {(released ? "Yes" : "No")}\n";
+            if (!released)
+            {
+                unpurchasedGameInfo += $"Release Date:      {(!released ? releaseDate.ToString("dd/MM/yyyy") : "N/A")}\n";
+            }
+            return unpurchasedGameInfo;
+        }
+
         public void SaveGameInfo()
         {
             CSVHandler.UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, Menu.mainFiles.unpurchasedGameFile);
+            if (Menu.FindGameByID(gameID) != null)
+            {
+                Menu.UpdateGameByID(this);
+            } else
+            {
+                Menu.existingVideoGames.Add(this);
+            }
         }
     }
 }

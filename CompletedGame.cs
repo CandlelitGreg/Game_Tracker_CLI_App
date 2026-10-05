@@ -108,7 +108,7 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingCompletedGames.Add(this);
-            Menu.existingVideoGames.Add(this);
+            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
         }
 
@@ -137,9 +137,38 @@ namespace GameTrackerEx01
             //TODO: build this out to be a multi-line reading func
         }
 
+        public string ReadReview()
+        {
+            return Format.ReturnCommasToString(review);
+        }
+
+        public string DisplayCompletedGameInfo()
+        {
+            string completedGameInfo = DisplayPlayedInfo();
+            completedGameInfo += 
+                                 $"First Played Date: {firstPlayedDate.ToString("dd/MM/yyyy")}\n" +
+                                 $"Completion Date:   {completionDate.ToString("dd/MM/yyyy")}\n" +
+                                 $"\n vvv---Review---vvv \n{ReadReview()}\n ^^^---Review---^^^\n\n";
+            if (replaying)
+            {
+                completedGameInfo += $"Currently Replaying: Yes\n";
+            } else if (wantToPlayAgain)
+            {
+                completedGameInfo += $"Want to Play Again: {(wantToPlayAgain ? "Yes" : "No")}\n";
+            }
+            return completedGameInfo;
+        }
+
         public void SaveGameInfo()
         {
             CSVHandler.UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, Menu.mainFiles.completedGameFile);
+            if (Menu.FindGameByID(gameID) != null)
+            {
+                Menu.UpdateGameByID(this);
+            } else
+            {
+                Menu.existingVideoGames.Add(this);
+            }
         }
     }
 }

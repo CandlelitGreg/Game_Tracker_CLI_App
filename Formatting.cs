@@ -22,10 +22,8 @@ namespace GameTrackerEx01
                 switch (userInput) {
                     case 1 :
                         return input.Replace(",", "");
-                        break;
                     case 2 :
                         return CheckForCommas(Console.ReadLine(), inputPurpose);
-                        break;
                 }
 
             } else if (input.Replace(",", "").Length < 1) 
@@ -228,6 +226,11 @@ namespace GameTrackerEx01
         public static string ReplaceCommasInString(string commaFilledInput)
         {
             return commaFilledInput.Replace(",", "<^&^>");
+        }
+
+        public static string ReturnCommasToString(string commaReplacedInput)
+        {
+            return commaReplacedInput.Replace("<^&^>", ",");
         }
 
         

@@ -120,7 +120,7 @@ namespace GameTrackerEx01
 
 
         }
-
+        //TODO: Fix bug where newly created sequel is not attached to original game
         public int GetSequelStatus()
         {
             Menu.Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
@@ -130,7 +130,10 @@ namespace GameTrackerEx01
             {
                 for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    if (followingEntry.ToLower() == Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName)
+                    Console.WriteLine($"franchiseEntryIDs should have {gameFranchise.franchiseEntryIDs.Length} entries, and the current index is {i} and the current gameID is {gameFranchise.franchiseEntryIDs[i]}");
+                    Console.WriteLine($"Comparing {followingEntry.ToLower()} to {Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower()}");
+                    string nextIDName = Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower();
+                    if (followingEntry.ToLower() == nextIDName)
                     {
                         return gameFranchise.franchiseEntryIDs[i];
                     }
@@ -181,6 +184,15 @@ namespace GameTrackerEx01
 
         }
 
+        public VideoGame GetNextEntry()
+        {
+            if (nextEntryID != -1)
+            {
+                return Menu.FindGameByID(nextEntryID);
+            }
+            return null;
+        }
+
         public void EditPlayAgainStatus()
         {
 
@@ -191,7 +203,7 @@ namespace GameTrackerEx01
 
         public string ReadInitialImpressions()
         {
-            return initialImpressions;
+            return Format.ReturnCommasToString(initialImpressions);
         }
 
         public float ReadHoursPlayed()
@@ -207,6 +219,35 @@ namespace GameTrackerEx01
         public int ReadRating()
         {
             return rating;
+        }
+
+        public string DisplayPlayedInfo()
+        {
+            string playedGameInfo = 
+                                   $"Hours Played:      {hoursPlayed}\n" +
+                                   $"Rating:            {rating}\n" +
+                                   $"Initial Excitement Level: {initialExcitementLevel}\n" +
+                                   $"\n vvv---Initial Impressions---vvv \n{ReadInitialImpressions()}\n ^^^---Initial Impressions---^^^\n\n";
+            if (nextEntryID != -1)
+            {
+                playedGameInfo += $"Next Entry:        {Menu.FindGameByID(nextEntryID).gameName}\n";
+            }
+            if (logMessages.Length > 0)
+            {
+                for (int i = 0; i < logMessages.Length; i++)
+                {
+                    playedGameInfo += $"Log Message {i + 1}:      {Format.ReturnCommasToString(logMessages[i])}\n";
+                }
+            }
+            if (!string.IsNullOrWhiteSpace(mainPlayDevice))
+            {
+                playedGameInfo += $"Main Play Device:  {mainPlayDevice}\n";
+            }
+            if (modded)
+            {
+                playedGameInfo += $"Modded:      Yes\n";
+            }
+            return playedGameInfo;
         }
 
         public int ReadIntialExcitment()

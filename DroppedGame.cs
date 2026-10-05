@@ -80,20 +80,22 @@ namespace GameTrackerEx01
             dateDropped = DateOnly.FromDateTime(Format.GetDateValue($"date you last played {gameName} in format dd/MM/yyyy"));
             
             //Get reason dropped
-            reasonDropped = Format.AskForInput($"reason you stopped playing {gameName}");
+            reasonDropped = Format.ReplaceCommasInString(WriteWhyDropped());
 
             //Get wouldRetry bool
             wouldRetry = Format.GetClosedAnswer($"Would you conisder retrying {gameName}? (y/n)");
 
             //Save changes
             Menu.existingDroppedGames.Add(this);
-            Menu.existingVideoGames.Add(this);
+            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
         }
 
-        public void AddWhyDropped()
+        public string WriteWhyDropped()
         {
-
+            Console.WriteLine($"Please enter your review for {gameName}:");
+            return Console.ReadLine();
+            //TODO: build this out to be a multi-line reading func
         }
 
         public void updateRetryStatus()
@@ -103,7 +105,7 @@ namespace GameTrackerEx01
 
         public string ReadWhyDropped()
         {
-            return reasonDropped;
+            return Format.ReturnCommasToString(reasonDropped);
         }
 
         public bool ReadRetry()
@@ -126,9 +128,26 @@ namespace GameTrackerEx01
             
         }
 
+        public string DisplayDroppedGameInfo()
+        {
+            string droppedGameInfo = DisplayPlayedInfo();
+            droppedGameInfo += 
+                                $"Date Dropped: {dateDropped.ToString("dd/MM/yyyy")}\n" +
+                                $"Reason Dropped: {ReadWhyDropped()}\n" +
+                                $"Would Retry: {(wouldRetry ? "Yes" : "No")}\n";
+            return droppedGameInfo;
+        }
+
         public void SaveGameInfo()
         {
             CSVHandler.UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, Menu.mainFiles.droppedGameFile);
+            if (Menu.FindGameByID(gameID) != null)
+            {
+                Menu.UpdateGameByID(this);
+            } else
+            {
+                Menu.existingVideoGames.Add(this);
+            }
         }
     }
 }

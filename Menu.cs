@@ -49,6 +49,7 @@ namespace GameTrackerEx01
             public float avgGenreLength {get;set;}
             public float avgGenrePlaytime {get;set;}
             public float avgGenreExcitement {get;set;}
+            public float avgGenreCompletion {get;set;}
 
             public void AttachFranchiseToGenre(int franchiseID)
             {
@@ -60,6 +61,75 @@ namespace GameTrackerEx01
             {
                 attachedGameIDs = attachedGameIDs.Append(gameID).ToArray();
                 SaveGenreChanges();
+            }
+
+            public void OpenGenreDetails()
+            {
+                Console.WriteLine($"What would you like to do with the {genreName} genre?\n" +
+                                  $"1. View associated games\n" +
+                                  $"2. View associated franchises\n" +
+                                  $"3. View genre averages\n" +
+                                  $"4. Return to home page");
+                int userInput = Format.GetSingleResponse(4, "What would you like to do with the genre?");
+                switch (userInput)
+                {
+                    case 1:
+                        ViewAssociatedGames();
+                        break;
+                    case 2:
+                        ViewAssociatedFranchises();
+                        break;
+                    case 3:
+                        ViewGenreAverages();
+                        break;
+                    case 4:
+                        return;
+                }
+                if (Format.GetClosedAnswer($"Would you like to interact with the {genreName} genre again? (y/n)"))
+                {
+                    OpenGenreDetails();
+                }
+            }
+
+            public void ViewGenreAverages()
+            {    
+                Console.WriteLine($"Genre Name:               {genreName}\n" +
+                                  $"Average Genre Rating:     {avgGenreRating}\n" +
+                                  $"Average Genre Length:     {avgGenreLength}\n" +
+                                  $"Average Genre Playtime:   {avgGenrePlaytime}\n" +
+                                  $"Average Genre Excitement: {avgGenreExcitement}\n" +
+                                  $"Average Genre Completion: {avgGenreCompletion}\n");
+            }
+
+            public void ViewAssociatedFranchises()
+            {    
+                Console.WriteLine($"Genre Name:           {genreName}\n" +
+                                  $"Franchises associated with Genre:\n");
+                for (int i = 0; i < attachedFranchiseIDs.Length; i++)
+                {
+                    int franchiseIndex = FindFranchise(attachedFranchiseIDs[i]);
+                    if (franchiseIndex != -1)
+                    {
+                        Franchise franchise = existingFranchises[franchiseIndex];
+                        Console.WriteLine($"{i + 1}: {franchise.franchiseName}");
+                    }
+                }
+                //TODO: Add functionality to view details of each franchise associated with the genre
+            }
+
+            public void ViewAssociatedGames()
+            {
+                Console.WriteLine($"Genre Name:           {genreName}\n" +
+                                  $"Games associated with Genre:\n");
+                for (int i = 0; i < attachedGameIDs.Length; i++)
+                {
+                    VideoGame game = FindGameByID(attachedGameIDs[i]);
+                    if (game != null)
+                    {
+                        Console.WriteLine($"{i + 1}: {game.gameName}");
+                    }
+                }
+                //TODO: Add functionality to view details of each game associated with the genre
             }
 
             public void SaveGenreChanges()
@@ -98,6 +168,28 @@ namespace GameTrackerEx01
             public int[] franchiseEntryIDs {get; set;} = [];
             public int[] franchiseGenreIDs {get; set;} = [];
             public float avgFranchiseRating {get;set;}
+
+            public string ViewFranchiseDetails()
+            {
+                string franchiseDetails = $"Franchise Name: {franchiseName}\n" +
+                                          $"Average Franchise Rating: {avgFranchiseRating}\n" +
+                                          $"\nGames in Franchise:\n";
+                for (int i = 0; i < franchiseEntryIDs.Length; i++)
+                {   
+                    franchiseDetails += $"{i + 1}. {FindGameByID(franchiseEntryIDs[i]).gameName}\n";
+                }
+                franchiseDetails += $"\nGenres associated with Franchise:\n";
+                for (int i = 0; i < franchiseGenreIDs.Length; i++)
+                {
+                    int genreIndex = FindGenre(franchiseGenreIDs[i]);
+                    if (genreIndex != -1)
+                    {
+                        Genre genre = existingGenres[genreIndex];
+                        franchiseDetails += $"{i + 1}: {genre.genreName}\n";
+                    }
+                }
+                return franchiseDetails;
+            }
 
             public void SaveFranchiseChanges()
             {
@@ -148,12 +240,11 @@ namespace GameTrackerEx01
             var allGames = GetAllVideoGames();
             existingVideoGames.AddRange(allGames.vgs);
             existingReplays.AddRange(allGames.replays);
+            SortGameLists();
             Console.WriteLine($"There are {existingVideoGames.Count} total games in the tracker\n");
-            // Console.WriteLine(existingVideoGames);
             for (int i = 0; i < existingVideoGames.Count; i++)
             {
-                Console.WriteLine(existingVideoGames[i].DisplayGameDetails());
-                // Console.WriteLine($"{i + 1}. {existingVideoGames[i].gameName}");
+                Console.WriteLine("\n" +existingVideoGames[i].DisplayGameDetails() + "\n");
             }
 
             Console.WriteLine($"\nThere are {existingFranchises.Count} total franchises in the tracker\n");
@@ -184,9 +275,6 @@ namespace GameTrackerEx01
                 case var _ when typeof(T) == typeof(CompletedGame):
                     csv.Context.RegisterClassMap<RetrieveCompletedGameMap>();
                     break;
-                // case var _ when typeof(T) == typeof(PlayedGame):
-                //     csv.Context.RegisterClassMap<PlayedGameMap>();
-                //     break;
                 case var _ when typeof(T) == typeof(UnpurchasedGame):
                     csv.Context.RegisterClassMap<RetrieveUnpurchasedGameMap>();
                     break;
@@ -199,11 +287,19 @@ namespace GameTrackerEx01
                 case var _ when typeof(T) == typeof(Franchise):
                     csv.Context.RegisterClassMap<RetrieveFranchiseMap>();
                     break;
-                // case var _ when typeof(T) == typeof(VideoGame):
-                //     csv.Context.RegisterClassMap<VideoGameMap>();
-                //     break;
             }
             return csv.GetRecords<T>().ToList();
+        }
+
+        public static void SortGameLists()
+        {
+            existingVideoGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingReplays.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingCurrentGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingCompletedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingDroppedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingUnpurchasedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
+            existingBackloggedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
         }
 
         public static int GetAndUpdateNextGameID()
@@ -252,23 +348,13 @@ namespace GameTrackerEx01
 
         public static int FindGenre(int searchID)
         {
-            // if (searchID == existingGenres[existingGenres.Count-1].genreID)
-            // {
-            //     return existingGenres.Count-1;
-            // }
-            // if (searchID == 0 && existingGenres[0].genreID == 0)
-            // {
-            //     return 0;
-            // }
             int highIndex = existingGenres.Count-1;
             int lowIndex = 0;
-            //int i = 0;
-            //Console.WriteLine("check 2");
+
             while (lowIndex <= highIndex)
             {
                 int midIndex = lowIndex + ((highIndex - lowIndex) / 2);
-                //i++;
-                //Console.WriteLine($"Run {i}: High index: {highIndex}, Low index: {lowIndex}, Mid Index: {midIndex}, Search ID: {searchID}");
+
                 
                 if (existingGenres[midIndex].genreID == searchID)
                 {
@@ -284,12 +370,6 @@ namespace GameTrackerEx01
                 }
             }
 
-            // if (existingGenres[highIndex].genreID == searchID)
-            // {
-            //     return highIndex;
-            // } else {
-            //     return lowIndex;
-            // }
             Console.WriteLine($"Fell through: High index: {highIndex}, Low index: {lowIndex}, Search ID: {searchID}");
             return -1;
         }
@@ -396,22 +476,12 @@ namespace GameTrackerEx01
                     highIndex = midIndex - 1;
                 }
             }
-            // if (existingFranchises[highIndex].franchiseID == searchID)
-            // {
-            //     return highIndex;
-            // } else {
-            //     return lowIndex;
-            // }
             return -1;
 
         }
 
         public static VideoGame FindGameByID(int searchID)
         {
-            // if (searchID == 0 && existingVideoGames[0].gameID == 0)
-            // {
-            //     return existingVideoGames[0];
-            // }
             int highIndex = existingVideoGames.Count-1;
             int lowIndex = 0;
             while (lowIndex <= highIndex)
@@ -430,16 +500,80 @@ namespace GameTrackerEx01
                     highIndex = midIndex - 1;
                 }
             }
-            // if (existingVideoGames[lowIndex].gameID == searchID)
-            // {
-            //     return existingVideoGames[lowIndex];
-            // } else if (existingVideoGames[highIndex].gameID == searchID)
-            // {
-            //     return existingVideoGames[highIndex];
-            // } else {
-            //     return null;
-            // }
             return null;
+        }
+
+        public static void UpdateGameByID(VideoGame updatedGame)
+        {
+            int highIndex = existingVideoGames.Count-1;
+            int lowIndex = 0;
+            int midIndex = 0;
+            while (lowIndex <= highIndex)
+            {
+                midIndex = lowIndex + (highIndex - lowIndex) / 2;
+                if (existingVideoGames[midIndex].gameID == updatedGame.gameID)
+                {
+                    break;
+                }
+                if (existingVideoGames[midIndex].gameID < updatedGame.gameID)
+                {
+                    lowIndex = midIndex + 1;
+                }
+                else
+                {
+                    highIndex = midIndex - 1;
+                }
+            }
+            if (existingVideoGames[midIndex].gameID == updatedGame.gameID)
+            {
+                existingVideoGames[midIndex] = updatedGame;
+            }
+            
+        }
+
+        public static T FindDetailedGameByID<T>(int searchID)
+        {
+            var gameList = new List<T>();
+            switch (true)
+            {
+                case var _ when typeof(T) == typeof(CurrentGame):
+                    gameList= existingCurrentGames as List<T>;
+                    break;
+                case var _ when typeof(T) == typeof(CompletedGame):
+                    gameList = existingCompletedGames as List<T>;
+                    break;
+                case var _ when typeof(T) == typeof(DroppedGame):
+                    gameList = existingDroppedGames as List<T>;
+                    break;
+                case var _ when typeof(T) == typeof(UnpurchasedGame):
+                    gameList = existingUnpurchasedGames as List<T>;
+                    break;
+                case var _ when typeof(T) == typeof(BackloggedGame):
+                    gameList = existingBackloggedGames as List<T>;
+                    break;
+                default:
+                    return default(T);
+            }
+            int highIndex = gameList.Count-1;
+            int lowIndex = 0;
+            while (lowIndex <= highIndex)
+            {
+                int midIndex = lowIndex + (highIndex - lowIndex) / 2;
+                VideoGame midGame = gameList[midIndex] as VideoGame;
+                if (midGame.gameID == searchID)
+                {
+                    return gameList[midIndex];
+                }
+                if (midGame.gameID < searchID)
+                {
+                    lowIndex = midIndex + 1;
+                }
+                else
+                {
+                    highIndex = midIndex - 1;
+                }
+            }
+            return default(T);
         }
 
         public static VideoGame FindGameByTitle(string searchTitle)
