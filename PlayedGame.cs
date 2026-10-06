@@ -123,7 +123,7 @@ namespace GameTrackerEx01
         //TODO: Fix bug where newly created sequel is not attached to original game
         public int GetSequelStatus()
         {
-            Menu.Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
+            Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
             Console.WriteLine($"Please input the name of the game after {gameName} in the franchise of {gameFranchise.franchiseName}.");
             string followingEntry = Format.CheckForCommas(Console.ReadLine(), $"title for the sequel to {gameName}");
             if (gameFranchise.franchiseEntryIDs.Length > 1)

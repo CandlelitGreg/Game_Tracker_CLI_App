@@ -140,6 +140,11 @@ namespace GameTrackerEx01
             //remove this object
         }
 
+        public void EditChildDetails()
+        {
+            
+        }
+
         public string DisplayCurrentGameInfo()
         {
             string currentGameInfo = DisplayPlayedInfo();

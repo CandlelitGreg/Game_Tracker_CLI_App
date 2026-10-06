@@ -115,6 +115,11 @@ namespace GameTrackerEx01
             //Remove this object
         }
 
+        public void EditChildDetails()
+        {
+            
+        }
+
         public string DisplayUnpurchasedGameInfo()
         {
             string unpurchasedGameInfo = DisplayUnplayedGameInfo() +

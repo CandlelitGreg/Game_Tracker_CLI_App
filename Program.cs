@@ -38,8 +38,8 @@ namespace GameTrackerEx01
             Console.WriteLine("3. View franchises in tracker");
             Console.WriteLine("4. View genres in tracker");
             Console.WriteLine("5. Get game recommendation");
-            Console.WriteLine("6. Exit");
-            int userInput = Format.GetSingleResponse(6, "What action would you like to do?");
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(5, "What action would you like to do?");
             switch (userInput)
             {
                 case 1:
@@ -57,7 +57,7 @@ namespace GameTrackerEx01
                 case 5:
                     //TODO: Display list of recommended games based on previous games stats
                     break;
-                case 6:
+                case 0:
                     return;
             }
             if (Format.GetClosedAnswer($"Would you like to return to the home page? (y/n)"))
@@ -74,9 +74,9 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine($"{i + 1}. {Menu.existingVideoGames[i].gameName}");
             }
-            Console.WriteLine("\nPlease select a game to view details for, or type 0 to return to the home page.");
-            //TODO: Add functionality for pressing 0 to return to home page
+            Console.WriteLine("\nPlease select a game to view details for, or type 0 to go back.");
             int userInput = Format.GetSingleResponse(Menu.existingVideoGames.Count, "Which game would you like to view details for?");
+            if (userInput == 0) return;
             Menu.existingVideoGames[userInput-1].OpenGameDetails();
             if (Format.GetClosedAnswer($"Would you like to interact with another game? (y/n)"))
             {
@@ -91,10 +91,10 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
             }
-            Console.WriteLine("\nPlease select a franchise to view details for, or type 0 to return to the home page.");
+            Console.WriteLine("\nPlease select a franchise to engage with, or type 0 to go back");
             int userInput = Format.GetSingleResponse(Menu.existingFranchises.Count, "Which franchise would you like to view details for?");
-            //TODO: Add functionality for pressing 0 to return to home page
-            Console.WriteLine(Menu.existingFranchises[userInput-1].ViewFranchiseDetails());
+            if (userInput == 0) return;
+            Menu.existingFranchises[userInput-1].OpenFranchise();
             if (Format.GetClosedAnswer($"Would you like to interact with another franchise? (y/n)"))
             {
                 ViewFranchises();
@@ -108,10 +108,10 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine($"{i + 1}. {Menu.existingGenres[i].genreName}");
             }
-            Console.WriteLine("\nPlease select a genre to view details for, or type 0 to return to the home page.");
-            //TODO: Add functionality for pressing 0 to return to home page
+            Console.WriteLine("\nPlease select a genre to view details for, or type 0 to go back");
             int userInput = Format.GetSingleResponse(Menu.existingGenres.Count, "Which genre would you like to view details for?");
-            Menu.existingGenres[userInput-1].OpenGenreDetails();
+            if (userInput == 0) return;
+            Menu.existingGenres[userInput-1].OpenGenre();
             if (Format.GetClosedAnswer($"Would you like to interact with another genre? (y/n)"))
             {
                 ViewGenres();
@@ -121,7 +121,6 @@ namespace GameTrackerEx01
         {
             VideoGame newGame = new VideoGame();
             newGame.AddGame();
-            Menu.existingVideoGames.Add(newGame);
         }
 
         public static void SearchGames()

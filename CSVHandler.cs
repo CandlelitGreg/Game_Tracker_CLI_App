@@ -58,11 +58,11 @@ namespace GameTrackerEx01
                 case List<BackloggedGame>:
                     csv.Context.RegisterClassMap<BackloggedGameMap>();
                     break;
-                case List<Menu.Genre>:
-                    csv.Context.RegisterClassMap<Menu.GenreMap>();
+                case List<Genre>:
+                    csv.Context.RegisterClassMap<GenreMap>();
                     break;
-                case List<Menu.Franchise>:
-                    csv.Context.RegisterClassMap<Menu.FranchiseMap>();
+                case List<Franchise>:
+                    csv.Context.RegisterClassMap<FranchiseMap>();
                     break;
                 // case List<VideoGame>:
                 //     csv.Context.RegisterClassMap<VideoGameMap>();
@@ -86,8 +86,8 @@ namespace GameTrackerEx01
             newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
 
 
-            UpdateInfoFile<Menu.Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
-            UpdateInfoFile<Menu.Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
+            UpdateInfoFile<Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
+            UpdateInfoFile<Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
             UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);
             UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, newSettingsInfo.completedGameFile);
             UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, newSettingsInfo.droppedGameFile);
@@ -115,8 +115,8 @@ namespace GameTrackerEx01
             newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
 
 
-            UpdateInfoFile<Menu.Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
-            UpdateInfoFile<Menu.Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
+            UpdateInfoFile<Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
+            UpdateInfoFile<Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
             UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);
             UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, newSettingsInfo.completedGameFile);
             UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, newSettingsInfo.droppedGameFile);

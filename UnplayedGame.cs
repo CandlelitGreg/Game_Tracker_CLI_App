@@ -86,7 +86,7 @@ namespace GameTrackerEx01
 
         public int GetPrequelStatus()
         {
-            Menu.Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
+            Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
             Console.WriteLine($"Please input the name of the game preceeding {gameName} in the franchise of {gameFranchise.franchiseName}.");
             string previousEntry = Format.CheckForCommas(Console.ReadLine(), "previous franchise entry");
             if (gameFranchise.franchiseEntryIDs.Length > 1)
@@ -129,6 +129,22 @@ namespace GameTrackerEx01
                 }
             }
             return -1;
+        }
+
+        public bool CheckWaitingForPreviousEntry()
+        {
+            if (franchiseID == -1 || previousEntryID == -1)
+            {
+                return false;
+            }
+            if (Menu.FindGameByID(previousEntryID).completed)
+            {
+                return false;
+            } 
+            else
+            {
+                return true;
+            }
         }
 
         public void EditPurchased()

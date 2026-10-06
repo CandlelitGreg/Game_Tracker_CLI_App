@@ -128,6 +128,11 @@ namespace GameTrackerEx01
             
         }
 
+        public void EditChildDetails()
+        {
+            
+        }
+
         public string DisplayDroppedGameInfo()
         {
             string droppedGameInfo = DisplayPlayedInfo();

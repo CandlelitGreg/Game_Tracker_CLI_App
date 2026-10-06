@@ -3,199 +3,13 @@ using CsvHelper.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace GameTrackerEx01
 {
     public static class Menu
     {
         public static string settingsPath = "saveFiles/Game_Tracker_Settings_Info.csv";
-
-        public sealed class GenreMap : ClassMap<Genre>
-        {
-            public GenreMap()
-            {
-                Map(m => m.genreID);
-                Map(m => m.genreName);
-                Map(m => m.attachedFranchiseIDs).Convert(args => string.Join(";", args.Value.attachedFranchiseIDs));
-                Map(m => m.attachedGameIDs).Convert(args => string.Join(";", args.Value.attachedGameIDs));
-                Map(m => m.avgGenreRating);
-                Map(m => m.avgGenreLength);
-                Map(m => m.avgGenrePlaytime);
-                Map(m => m.avgGenreExcitement);
-            }
-        }
-
-        public sealed class RetrieveGenreMap : ClassMap<Genre>
-        {
-            public RetrieveGenreMap()
-            {
-                Map(m => m.genreID);
-                Map(m => m.genreName);
-                Map(m => m.attachedFranchiseIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("attachedFranchiseIDs")) ? Array.Empty<int>() : args.Row.GetField("attachedFranchiseIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
-                Map(m => m.attachedGameIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("attachedGameIDs")) ? Array.Empty<int>() : args.Row.GetField("attachedGameIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
-                Map(m => m.avgGenreRating);
-                Map(m => m.avgGenreLength);
-                Map(m => m.avgGenrePlaytime);
-                Map(m => m.avgGenreExcitement);
-            }
-        }
-
-        public class Genre {
-            public int genreID {get;set;}
-            public string genreName {get; set;}
-            public int[] attachedFranchiseIDs {get;set;} = [];
-            public int[] attachedGameIDs {get;set;} = [];
-            public float avgGenreRating {get;set;}
-            public float avgGenreLength {get;set;}
-            public float avgGenrePlaytime {get;set;}
-            public float avgGenreExcitement {get;set;}
-            public float avgGenreCompletion {get;set;}
-
-            public void AttachFranchiseToGenre(int franchiseID)
-            {
-                attachedFranchiseIDs = attachedFranchiseIDs.Append(franchiseID).ToArray();
-                SaveGenreChanges();
-            }
-
-            public void AttachGameToGenre(int gameID)
-            {
-                attachedGameIDs = attachedGameIDs.Append(gameID).ToArray();
-                SaveGenreChanges();
-            }
-
-            public void OpenGenreDetails()
-            {
-                Console.WriteLine($"What would you like to do with the {genreName} genre?\n" +
-                                  $"1. View associated games\n" +
-                                  $"2. View associated franchises\n" +
-                                  $"3. View genre averages\n" +
-                                  $"4. Return to home page");
-                int userInput = Format.GetSingleResponse(4, "What would you like to do with the genre?");
-                switch (userInput)
-                {
-                    case 1:
-                        ViewAssociatedGames();
-                        break;
-                    case 2:
-                        ViewAssociatedFranchises();
-                        break;
-                    case 3:
-                        ViewGenreAverages();
-                        break;
-                    case 4:
-                        return;
-                }
-                if (Format.GetClosedAnswer($"Would you like to interact with the {genreName} genre again? (y/n)"))
-                {
-                    OpenGenreDetails();
-                }
-            }
-
-            public void ViewGenreAverages()
-            {    
-                Console.WriteLine($"Genre Name:               {genreName}\n" +
-                                  $"Average Genre Rating:     {avgGenreRating}\n" +
-                                  $"Average Genre Length:     {avgGenreLength}\n" +
-                                  $"Average Genre Playtime:   {avgGenrePlaytime}\n" +
-                                  $"Average Genre Excitement: {avgGenreExcitement}\n" +
-                                  $"Average Genre Completion: {avgGenreCompletion}\n");
-            }
-
-            public void ViewAssociatedFranchises()
-            {    
-                Console.WriteLine($"Genre Name:           {genreName}\n" +
-                                  $"Franchises associated with Genre:\n");
-                for (int i = 0; i < attachedFranchiseIDs.Length; i++)
-                {
-                    int franchiseIndex = FindFranchise(attachedFranchiseIDs[i]);
-                    if (franchiseIndex != -1)
-                    {
-                        Franchise franchise = existingFranchises[franchiseIndex];
-                        Console.WriteLine($"{i + 1}: {franchise.franchiseName}");
-                    }
-                }
-                //TODO: Add functionality to view details of each franchise associated with the genre
-            }
-
-            public void ViewAssociatedGames()
-            {
-                Console.WriteLine($"Genre Name:           {genreName}\n" +
-                                  $"Games associated with Genre:\n");
-                for (int i = 0; i < attachedGameIDs.Length; i++)
-                {
-                    VideoGame game = FindGameByID(attachedGameIDs[i]);
-                    if (game != null)
-                    {
-                        Console.WriteLine($"{i + 1}: {game.gameName}");
-                    }
-                }
-                //TODO: Add functionality to view details of each game associated with the genre
-            }
-
-            public void SaveGenreChanges()
-            {
-                CSVHandler.UpdateInfoFile<Genre>(existingGenres, mainFiles.genreFile);
-            }
-        }
-
-        public sealed class FranchiseMap : ClassMap<Franchise>
-        {
-            public FranchiseMap()
-            {
-                Map(m => m.franchiseID);
-                Map(m => m.franchiseName);
-                Map(m => m.franchiseEntryIDs).Convert(args => string.Join(";", args.Value.franchiseEntryIDs));
-                Map(m => m.franchiseGenreIDs).Convert(args => string.Join(";", args.Value.franchiseGenreIDs));
-                Map(m => m.avgFranchiseRating);
-            }
-        }
-
-        public sealed class RetrieveFranchiseMap : ClassMap<Franchise>
-        {
-            public RetrieveFranchiseMap()
-            {
-                Map(m => m.franchiseID);
-                Map(m => m.franchiseName);
-                Map(m => m.franchiseEntryIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("franchiseEntryIDs")) ? Array.Empty<int>() : args.Row.GetField("franchiseEntryIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
-                Map(m => m.franchiseGenreIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("franchiseGenreIDs")) ? Array.Empty<int>() : args.Row.GetField("franchiseGenreIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
-                Map(m => m.avgFranchiseRating);
-            }
-        }
-        
-        public class Franchise {
-            public int franchiseID {get; set;}
-            public string franchiseName {get; set;}
-            public int[] franchiseEntryIDs {get; set;} = [];
-            public int[] franchiseGenreIDs {get; set;} = [];
-            public float avgFranchiseRating {get;set;}
-
-            public string ViewFranchiseDetails()
-            {
-                string franchiseDetails = $"Franchise Name: {franchiseName}\n" +
-                                          $"Average Franchise Rating: {avgFranchiseRating}\n" +
-                                          $"\nGames in Franchise:\n";
-                for (int i = 0; i < franchiseEntryIDs.Length; i++)
-                {   
-                    franchiseDetails += $"{i + 1}. {FindGameByID(franchiseEntryIDs[i]).gameName}\n";
-                }
-                franchiseDetails += $"\nGenres associated with Franchise:\n";
-                for (int i = 0; i < franchiseGenreIDs.Length; i++)
-                {
-                    int genreIndex = FindGenre(franchiseGenreIDs[i]);
-                    if (genreIndex != -1)
-                    {
-                        Genre genre = existingGenres[genreIndex];
-                        franchiseDetails += $"{i + 1}: {genre.genreName}\n";
-                    }
-                }
-                return franchiseDetails;
-            }
-
-            public void SaveFranchiseChanges()
-            {
-                CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, mainFiles.franchiseFile);
-            }
-        }
 
         public static List<Genre> existingGenres = [];
         public static List<Franchise> existingFranchises = [];
@@ -450,8 +264,8 @@ namespace GameTrackerEx01
         public static void AddGameToFranchise(int gameID, int franchiseID)
         {
             int franchiseIndex = FindFranchise(franchiseID);
-            Console.WriteLine($"Franchise ID: {franchiseID}, Franchise Index: {franchiseIndex}");
-            Console.WriteLine($"Game ID: {gameID}");
+            // Console.WriteLine($"Franchise ID: {franchiseID}, Franchise Index: {franchiseIndex}");
+            // Console.WriteLine($"Game ID: {gameID}");
             existingFranchises[franchiseIndex].franchiseEntryIDs = existingFranchises[franchiseIndex].franchiseEntryIDs.Append(gameID).ToArray();
             CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, mainFiles.franchiseFile);
         }

@@ -62,14 +62,17 @@ namespace GameTrackerEx01
 
             //Save changes
             Menu.existingBackloggedGames.Add(this);
-            // Menu.existingVideoGames.Add(this);
             SaveGameInfo();
+        }
+
+        public void EditChildDetails()
+        {
+            
         }
 
         public string DisplayBackloggedGameInfo()
         {
-            string backloggedGameInfo = DisplayUnplayedGameInfo() +
-                                    $"Purchase Date:     {purchaseDate.ToString("dd/MM/yyyy")}\n";
+            string backloggedGameInfo = DisplayUnplayedGameInfo() + $"Purchase Date:     {purchaseDate.ToString("dd/MM/yyyy")}\n";
             return backloggedGameInfo;
         }
 

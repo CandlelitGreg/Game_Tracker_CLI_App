@@ -142,6 +142,11 @@ namespace GameTrackerEx01
             return Format.ReturnCommasToString(review);
         }
 
+        public void EditChildDetails()
+        {
+            
+        }
+
         public string DisplayCompletedGameInfo()
         {
             string completedGameInfo = DisplayPlayedInfo();
