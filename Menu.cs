@@ -39,7 +39,7 @@ namespace GameTrackerEx01
         public static List<settingsInfo> backupFiles = [];
 
         public static settingsInfo mainFiles;
-
+        
         public static void GetStats()
         {
             backupFiles = DownloadInfo<settingsInfo>(settingsPath);
@@ -76,7 +76,6 @@ namespace GameTrackerEx01
                 existingGenres[i].ViewGenreAverages();
             }
         }
-
         public static List<T> DownloadInfo<T>(string filepath)
         {
             using var reader = new StreamReader(filepath);
@@ -107,7 +106,6 @@ namespace GameTrackerEx01
             }
             return csv.GetRecords<T>().ToList();
         }
-
         public static void SortGameLists()
         {
             existingVideoGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
@@ -118,7 +116,6 @@ namespace GameTrackerEx01
             existingUnpurchasedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
             existingBackloggedGames.Sort((x, y) => x.gameID.CompareTo(y.gameID));
         }
-
         public static int GetAndUpdateNextGameID()
         {
             mainFiles.nextGameID++;
@@ -126,7 +123,6 @@ namespace GameTrackerEx01
             CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGameID - 1;
         }
-
         public static int GetAndUpdateNextGenreID()
         {
             mainFiles.nextGenreID++;
@@ -134,7 +130,6 @@ namespace GameTrackerEx01
             CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGenreID - 1;
         }
-
         public static void AddNewGenre()
         {
             Console.WriteLine("Please write the name of the new genre below");
@@ -162,7 +157,6 @@ namespace GameTrackerEx01
             }
             CSVHandler.UpdateInfoFile<Genre>(existingGenres, mainFiles.genreFile);
         }
-
         public static int FindGenre(int searchID)
         {
             int highIndex = existingGenres.Count-1;
@@ -190,7 +184,6 @@ namespace GameTrackerEx01
             Console.WriteLine($"Fell through: High index: {highIndex}, Low index: {lowIndex}, Search ID: {searchID}");
             return -1;
         }
-
         public static int AddNewFranchise()
         {
             Console.WriteLine("Please write the name of the new franchise below");
@@ -263,7 +256,6 @@ namespace GameTrackerEx01
             CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, mainFiles.franchiseFile);
             return newFranchise.franchiseID;
         }
-
         public static void AddGameToFranchise(int gameID, int franchiseID)
         {
             int franchiseIndex = FindFranchise(franchiseID);
@@ -272,7 +264,6 @@ namespace GameTrackerEx01
             existingFranchises[franchiseIndex].franchiseEntryIDs = existingFranchises[franchiseIndex].franchiseEntryIDs.Append(gameID).ToArray();
             CSVHandler.UpdateInfoFile<Franchise>(existingFranchises, mainFiles.franchiseFile);
         }
-
         public static int FindFranchise(int searchID)
         {
             int highIndex = existingFranchises.Count-1;
@@ -296,7 +287,6 @@ namespace GameTrackerEx01
             return -1;
 
         }
-
         public static VideoGame FindGameByID(int searchID)
         {
             int highIndex = existingVideoGames.Count-1;
@@ -319,7 +309,6 @@ namespace GameTrackerEx01
             }
             return null;
         }
-
         public static void UpdateGameByID(VideoGame updatedGame)
         {
             int highIndex = existingVideoGames.Count-1;
@@ -347,7 +336,6 @@ namespace GameTrackerEx01
             }
             
         }
-
         public static T FindDetailedGameByID<T>(int searchID)
         {
             var gameList = new List<T>();
@@ -392,7 +380,6 @@ namespace GameTrackerEx01
             }
             return default(T);
         }
-
         public static VideoGame FindGameByTitle(string searchTitle)
         {
             for (int i = 0; i < existingVideoGames.Count; i++)
@@ -404,7 +391,6 @@ namespace GameTrackerEx01
             }
             return null;
         }
-
         public static (List<VideoGame> vgs, List<VideoGame> replays) GetAllVideoGames()
         {
             //Get replay ids
@@ -445,7 +431,6 @@ namespace GameTrackerEx01
             return (vgs, replays);
             
         } 
-
         public static (List<VideoGame> vgs, List<VideoGame> replays) SeperateReplaysFromList<T>(List<T> inputList, int[] replayIDs) where T : VideoGame
         {
             List<VideoGame> vgs = [];
@@ -461,7 +446,6 @@ namespace GameTrackerEx01
             }
             return (vgs, replays);
         }
-
         public static void CheckAllReleaseDates()
         {
             for (int i = 0; i < existingUnpurchasedGames.Count; i++)
@@ -471,26 +455,17 @@ namespace GameTrackerEx01
                     existingUnpurchasedGames[i].CheckIfReleased();
                 }
             }
-        }
-        
+        }       
         public static void RecalculateAllGenreStats()
         {
             for (int i = 0; i < existingGenres.Count; i++)
             {
                 existingGenres[i].RecalculateGenreStats();
             }
-        }
-        
-        public static void HomePage()
-        {
-            
-        }
-
+        }        
         public static void ViewBackups()
         {
 
-        }
-
-        
+        }        
     }
 }

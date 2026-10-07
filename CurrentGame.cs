@@ -106,7 +106,7 @@ namespace GameTrackerEx01
 
 
             //Get mainPlay device
-            mainPlayDevice = Format.AskForInput($" device you are primarily using to play {gameName}");
+            mainPlayDevice = Format.AskForInput($"device you are primarily using to play {gameName}");
 
             //Get modded status
             modded = Format.GetClosedAnswer($"Is this playthrough of {gameName} modded? (y/n)");

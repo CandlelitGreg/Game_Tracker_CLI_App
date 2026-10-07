@@ -89,7 +89,6 @@ namespace GameTrackerEx01
             }
             return franchiseDetails;
         }
-
         public void EditFranchiseDetails()
         {
             Console.WriteLine($"What element do you want to edit from the franchise of {franchiseName}?\n");
@@ -114,7 +113,6 @@ namespace GameTrackerEx01
             }
             return;
         }
-
         public void EditAttachedGames()
         {
             Console.WriteLine($"These are the current games for {franchiseName}:");
@@ -144,7 +142,6 @@ namespace GameTrackerEx01
                 EditAttachedGames();
             }
         }
-
         public void AddGames()
         {
             string gameName = Format.AskForInput($"the name of the game you would like to add to the franchise of {franchiseName}");
@@ -179,7 +176,6 @@ namespace GameTrackerEx01
             }
             SaveFranchiseChanges();
         }
-
         public void RemoveGames()
         {
             //Retrieve selection of all attached genres to remove
@@ -218,7 +214,6 @@ namespace GameTrackerEx01
                 RemoveSelectedGame(franchiseEntryIDs[removedGames[i]-1]);
             }
         }
-
         public void RemoveSelectedGame(int gameID)
         {
             //Remove game from genre
@@ -227,7 +222,6 @@ namespace GameTrackerEx01
             franchiseEntryIDs = franchiseEntryIDs.Where(ID => ID != gameID).ToArray();
             SaveFranchiseChanges();
         }
-
         public void EditGenres()
         {
             Console.WriteLine($"These are the current genres for {franchiseName}:");
@@ -257,7 +251,6 @@ namespace GameTrackerEx01
                 EditGenres();
             }
         }
-
         public void AddGenres()
         {
             if (Menu.existingGenres.Count - franchiseGenreIDs.Length < 1)
@@ -328,7 +321,6 @@ namespace GameTrackerEx01
 
             }
         }
-
         public void RemoveGenres()
         {
             //Retrieve selection of all attached genres to remove
@@ -368,7 +360,6 @@ namespace GameTrackerEx01
                 franchiseGenreIDs = franchiseGenreIDs.Where(ID => ID != franchiseGenreIDs[removedGenres[i] - 1]).ToArray();
             }
         }
-
         public void SaveFranchiseChanges()
         {
             CSVHandler.UpdateInfoFile<Franchise>(Menu.existingFranchises, Menu.mainFiles.franchiseFile);

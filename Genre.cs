@@ -62,19 +62,16 @@ namespace GameTrackerEx01
             attachedFranchiseIDs = attachedFranchiseIDs.Append(franchiseID).ToArray();
             SaveGenreChanges();
         }
-
         public void RemoveFranchiseFromGenre(int franchiseID)
         {
             attachedFranchiseIDs = attachedFranchiseIDs.Where(ID => ID != franchiseID).ToArray();
             SaveGenreChanges();
         }
-
         public void AttachGameToGenre(int gameID)
         {
             attachedGameIDs = attachedGameIDs.Append(gameID).ToArray();
             SaveGenreChanges();
         }
-
         public void RemoveGameFromGenre(int gameID)
         {
             attachedGameIDs = attachedGameIDs.Where(ID => ID != gameID).ToArray();
@@ -142,7 +139,6 @@ namespace GameTrackerEx01
                               $"Number of games unplayed:       {numGamesUnplayed}\n" +
                               $"Total # of hours played:        {totalHoursPlayed}\n");
         }
-
         public void ViewAssociatedFranchises()
         {    
             Console.WriteLine($"Genre Name:           {genreName}\n" +
@@ -158,7 +154,6 @@ namespace GameTrackerEx01
             }
             //TODO: Add functionality to view details of each franchise associated with the genre
         }
-
         public void ViewAssociatedGames()
         {
             Console.WriteLine($"Genre Name:           {genreName}\n" +
@@ -173,7 +168,6 @@ namespace GameTrackerEx01
             }
             //TODO: Add functionality to view details of each game associated with the genre
         }
-
         public void EditGenreDetails()
         {
             Console.WriteLine($"What information would you like to edit from the {genreName} genre?\n" +
@@ -235,13 +229,12 @@ namespace GameTrackerEx01
             {
                 searchedGame.gameGenreIDs = searchedGame.gameGenreIDs.Append(genreID).ToArray();
                 attachedGameIDs = attachedGameIDs.Append(searchedGame.gameID).ToArray();
+                AddGameInfoToAverages(searchedGame.gameID);
                 searchedGame.SaveGameUpdates();
             } 
             else if (Format.GetClosedAnswer($"{gameName} could not be found. Do you want to add it to your records? (y/n)"))
             {
                 Console.WriteLine($"This functionality is not yet implemented. Please add {gameName} from the home screen.");
-                // searchedGame = new VideoGame();
-                // searchedGame.AddGameFromGenre(gameName, genreID);
                 return;
             }
             if (Format.GetClosedAnswer($"Would you like to add a different game to the {genreName} genre? (y/n)"))
@@ -250,7 +243,6 @@ namespace GameTrackerEx01
             }
             SaveGenreChanges();
         }
-
         public void RemoveGenreGames()
         {
             //Retrieve selection of all attached genres to remove
@@ -290,10 +282,10 @@ namespace GameTrackerEx01
                 int currentGameID = attachedGameIDs[removedGames[i]-1];
                 Menu.FindGameByID(currentGameID).gameGenreIDs = Menu.FindGameByID(currentGameID).gameGenreIDs.Where(ID => ID != genreID).ToArray();
                 Menu.FindGameByID(currentGameID).SaveGameUpdates();
+                RemoveFromGenreStats(currentGameID);
                 RemoveGameFromGenre(currentGameID);
             }            
         }
-
         public void EditGenreFranchises()
         {
             Console.WriteLine($"These are the current franchises attached to the {genreName} genre:");
@@ -389,15 +381,143 @@ namespace GameTrackerEx01
                 } 
             }
         }
-
-        public void AddToGenreStats()
+        public void UpdateStatsForGame(int gameID)
         {
-            
+            RemoveFromGenreStats(gameID);
+            AddGameInfoToAverages(gameID);
         }
-
-        public void RemoveFromGenreStats()
+        public void AddGameInfoToAverages(int gameID)
         {
-            
+            VideoGame nextGame = Menu.FindGameByID(gameID);
+            if (nextGame == null)
+            {
+                RemoveGameFromGenre(gameID);
+                SaveGenreChanges();
+                RecalculateGenreStats();
+                SaveGenreChanges();
+                return;
+            }
+            //Check length
+            avgGenreLength = ((avgGenreLength * (attachedGameIDs.Length - 1)) + nextGame.avgGameLength) / attachedGameIDs.Length;
+            //Check played game
+            if (nextGame.played)
+            {
+                PlayedGame pGame = null;
+                if (nextGame.completed) pGame = Menu.FindDetailedGameByID<CompletedGame>(nextGame.gameID);
+                if (nextGame.playing) pGame = Menu.FindDetailedGameByID<CurrentGame>(nextGame.gameID);
+                if (!nextGame.playing && !nextGame.completed) pGame = Menu.FindDetailedGameByID<DroppedGame>(nextGame.gameID);
+
+                numGamesPlayed++;
+
+                //Check rating
+                avgGenreRating = ((avgGenreRating * (numGamesPlayed - 1)) + pGame.rating) / numGamesPlayed;
+
+                //Check completion
+                //If completed completion bonus = 1 else 0
+                //If completion bonus and avgGenreCompletion == 0, avgGenreCompletion still = 0 else calc average
+                int completionBonus = nextGame.completed ? 1 : 0;
+                avgGenreCompletion = avgGenreCompletion == 0 && completionBonus == 0 ? 0 : ((avgGenreCompletion * (numGamesPlayed - 1)) + completionBonus) / numGamesPlayed;
+
+                //Check playtime total
+                //Check playtime avg
+                totalHoursPlayed += pGame.hoursPlayed;
+                avgGenrePlaytime = totalHoursPlayed / numGamesPlayed;
+
+                //Check initial excitement
+                avgGenreExcitement = ((avgGenreExcitement * (attachedGameIDs.Length - 1)) + pGame.initialExcitementLevel) / attachedGameIDs.Length;
+            }
+            else
+            {
+            //Check unplayed game
+                UnplayedGame uGame = null;
+                uGame = nextGame.purchased ? Menu.FindDetailedGameByID<BackloggedGame>(nextGame.gameID) : Menu.FindDetailedGameByID<UnpurchasedGame>(nextGame.gameID);
+
+                numGamesUnplayed++;
+
+                //Check current excitement
+                avgGenreExcitement = ((avgGenreExcitement * (attachedGameIDs.Length - 1)) + uGame.excitementLevel) / attachedGameIDs.Length;
+
+            } 
+            SaveGenreChanges();
+        }
+        public void RemoveFromGenreStats(int gameID)
+        {
+            VideoGame nextGame = Menu.FindGameByID(gameID);
+            if (nextGame == null)
+            {
+                RemoveGameFromGenre(gameID);
+                SaveGenreChanges();
+                RecalculateGenreStats();
+                SaveGenreChanges();
+                return;
+            }
+            if (attachedGameIDs.Length == 1)
+            {
+                avgGenreRating = 0;
+                avgGenreLength = 0;
+                avgGenrePlaytime = 0;
+                avgGenreExcitement = 0;
+                avgGenreCompletion = 0;
+                numGamesPlayed = 0;
+                numGamesUnplayed = 0;
+                totalHoursPlayed = 0;
+                return;
+            }
+            //Check length
+            avgGenreLength = ((avgGenreLength * attachedGameIDs.Length) - nextGame.avgGameLength) / (attachedGameIDs.Length - 1);
+            //Check played game
+            if (nextGame.played)
+            {
+                PlayedGame pGame = null;
+                if (nextGame.completed) pGame = Menu.FindDetailedGameByID<CompletedGame>(nextGame.gameID);
+                if (nextGame.playing) pGame = Menu.FindDetailedGameByID<CurrentGame>(nextGame.gameID);
+                if (!nextGame.playing && !nextGame.completed) pGame = Menu.FindDetailedGameByID<DroppedGame>(nextGame.gameID);
+
+                if (numGamesPlayed == 1)
+                {
+                    avgGenreRating = 0;
+                    avgGenreLength = 0;
+                    avgGenrePlaytime = 0;
+                    avgGenreCompletion = 0;
+                    numGamesPlayed = 0;
+                    totalHoursPlayed = 0;
+                    avgGenreExcitement = ((avgGenreExcitement * attachedGameIDs.Length) - pGame.initialExcitementLevel) / (attachedGameIDs.Length - 1);
+                    return;
+                }
+
+
+                //Check rating
+                avgGenreRating = ((avgGenreRating * numGamesPlayed) - pGame.rating) / (numGamesPlayed - 1);
+
+                //Check completion
+                //If completed completion bonus = 1 else 0
+                //If completion bonus and avgGenreCompletion == 0, avgGenreCompletion still = 0 else calc average
+                int completionBonus = nextGame.completed ? 1 : 0;
+                avgGenreCompletion = avgGenreCompletion == 0 && completionBonus == 0 ? 0 : ((avgGenreCompletion * numGamesPlayed) - completionBonus) / (numGamesPlayed - 1);
+
+                //Check playtime total
+                //Check playtime avg
+                totalHoursPlayed -= pGame.hoursPlayed;
+                avgGenrePlaytime = totalHoursPlayed / (numGamesPlayed - 1);
+
+                //Check initial excitement
+                avgGenreExcitement = ((avgGenreExcitement * attachedGameIDs.Length) - pGame.initialExcitementLevel) / (attachedGameIDs.Length - 1);
+
+                numGamesPlayed--;
+            }
+            else
+            {
+            //Check unplayed game
+                UnplayedGame uGame = null;
+                uGame = nextGame.purchased ? Menu.FindDetailedGameByID<BackloggedGame>(nextGame.gameID) : Menu.FindDetailedGameByID<UnpurchasedGame>(nextGame.gameID);
+
+                //Check current excitement
+                avgGenreExcitement = ((avgGenreExcitement * attachedGameIDs.Length) - uGame.excitementLevel) / (attachedGameIDs.Length - 1);
+
+                numGamesUnplayed--;
+
+            } 
+            SaveGenreChanges();
         }
         public void AddGenreFranchise()
         {

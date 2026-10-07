@@ -11,6 +11,7 @@ using System.Net;
 
 namespace GameTrackerEx01
 {
+
     public sealed class VideoGameMap : ClassMap<VideoGame>
     {
         public VideoGameMap()
@@ -80,7 +81,6 @@ namespace GameTrackerEx01
 
             GetGameInfo();
         }
-
         public void AddToFranchise()
         {
             Console.WriteLine($"Please select the franchise {gameName} is a part of:");
@@ -105,8 +105,6 @@ namespace GameTrackerEx01
                 Menu.AddGameToFranchise(gameID, franchiseID);
             }
         }
-
-
         public void GetGameInfo()
         {
             if (gameID == -1)
@@ -155,7 +153,6 @@ namespace GameTrackerEx01
                         gameGenreIDs = gameGenreIDs.Append(Menu.existingGenres[matchingGenres[i]-1].genreID).ToArray();
                         Menu.existingGenres[matchingGenres[i]-1].AttachGameToGenre(gameID);
                     }
-                    
                 }
             }
 
@@ -192,11 +189,14 @@ namespace GameTrackerEx01
                 unplayedVersion.GetUnplayedInfo();
             }
 
-            // Menu.existingVideoGames.Add(this);
+            //Add game stats to genre averages
+            for (int i = 0; i < gameGenreIDs.Length; i++)
+            {
+                Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].AddGameInfoToAverages(gameID);
+            }
             
 
         }
-
         public void AddGameFromFranchise(string gameTitle, int existingFranchiseID)
         {
             //Add the game sequel or prequel to the game automatically
@@ -206,7 +206,6 @@ namespace GameTrackerEx01
             Menu.AddGameToFranchise(gameID, franchiseID);
             GetGameInfo();
         }
-
         public void UpdateGameLength()
         {
             float newGameLength = 0;
@@ -224,7 +223,6 @@ namespace GameTrackerEx01
         {
 
         }
-
         public void EditTitle()
         {
             string newName = "";
@@ -238,7 +236,6 @@ namespace GameTrackerEx01
                 SaveGameUpdates();
             }
         }
-
         public void EditDeckStatus()
         {
             if (deckPlayable)
@@ -256,7 +253,6 @@ namespace GameTrackerEx01
             }
             SaveGameUpdates();
         }
-
         public void AddGenres()
         {
             if (Menu.existingGenres.Count - gameGenreIDs.Length < 1)
@@ -272,6 +268,7 @@ namespace GameTrackerEx01
                         {
                             gameGenreIDs = gameGenreIDs.Append(Menu.existingGenres[i].genreID).ToArray();
                             Menu.existingGenres[i].AttachGameToGenre(gameID);
+                            Menu.existingGenres[i].AddGameInfoToAverages(gameID);
                         }
                     }
                 }
@@ -315,6 +312,7 @@ namespace GameTrackerEx01
                             {
                                 gameGenreIDs = gameGenreIDs.Append(Menu.existingGenres[q].genreID).ToArray();
                                 Menu.existingGenres[q].AttachGameToGenre(gameID);
+                                Menu.existingGenres[q].AddGameInfoToAverages(gameID);
                             }
                         }
                     }
@@ -323,12 +321,12 @@ namespace GameTrackerEx01
                 {
                     gameGenreIDs = gameGenreIDs.Append(unattachedGameGenres[newMatchingGenres[i]-1].genreID).ToArray();
                     Menu.existingGenres[genreIndex[newMatchingGenres[i]-1]].AttachGameToGenre(gameID);
+                    Menu.existingGenres[genreIndex[newMatchingGenres[i]-1]].AddGameInfoToAverages(gameID);
                 }
         
             }
 
         }
-
         public void RemoveGenres()
         {
 
@@ -365,11 +363,11 @@ namespace GameTrackerEx01
             //Remove Game from genres and genres from game
             for (int i = removedGenres.Length - 1; i >= 0; i--)
             {
+                Menu.existingGenres[Menu.FindGenre(gameGenreIDs[removedGenres[i]-1])].RemoveFromGenreStats(gameID);
                 Menu.existingGenres[Menu.FindGenre(gameGenreIDs[removedGenres[i]-1])].RemoveGameFromGenre(gameID);
                 gameGenreIDs = gameGenreIDs.Where(ID => ID != gameGenreIDs[removedGenres[i] - 1]).ToArray();
             }
         }
-
         public void RemoveFromSequel(int sequelID)
         {
             if (played)
@@ -406,7 +404,6 @@ namespace GameTrackerEx01
             }
             SaveGameUpdates();
         }
-
         public void SetSequel(int sequelID)
         {
             if (played)
@@ -443,32 +440,6 @@ namespace GameTrackerEx01
             }
             
         }
-
-        public string ReadTitle()
-        {
-            return gameName;
-        }
-
-        public float ReadAvgGameTime()
-        {
-            return avgGameLength;
-        }
-
-        public int[] ReadGenres()
-        {
-            return gameGenreIDs;
-        }
-
-        public bool ReadDeckPlayable()
-        {
-            return deckPlayable;
-        }
-
-        public bool ReadPlayed()
-        {
-            return played;
-        }
-
         public void EditGenres()
         {
             Console.WriteLine($"These are the current genres for {gameName}:");
@@ -498,7 +469,6 @@ namespace GameTrackerEx01
                 EditGenres();
             }
         }
-
         public void EditFurtherDetails()
         {
             switch (true)
@@ -520,7 +490,6 @@ namespace GameTrackerEx01
                     break;
             }
         }
-
         public void EditGameDetails()
         {
             Console.WriteLine($"What would you like to edit about {gameName}?\n");
@@ -552,7 +521,6 @@ namespace GameTrackerEx01
                     break;
             }
         }
-
         public void OpenGameDetails()
         {
             Console.WriteLine($"What would you like to do with {gameName}?\n");
@@ -581,7 +549,6 @@ namespace GameTrackerEx01
             }
             return;
         }
-
         public void ViewSimilarGames()
         {
             //Collect attachedGameID arrays for each gameGenre
@@ -644,7 +611,6 @@ namespace GameTrackerEx01
 
 
         }
-
         public string DisplayGameDetails()
         {
             string details = "";
@@ -694,7 +660,6 @@ namespace GameTrackerEx01
             }
             return details;
         }
-
         public bool ReadyToRecommend(
                                 bool filterWaitingForPrequel = false, 
                                 bool filterUnreleased = false, 
@@ -822,7 +787,13 @@ namespace GameTrackerEx01
             }
             return recommendable;
         }
-
+        public void UpdateAllGenreStats()
+        {
+            for (int i = 0; i < gameGenreIDs.Length; i++)
+            {
+                Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].UpdateStatsForGame(gameID);
+            }
+        }
         public void GrabGameInfo(VideoGame parentGame)
         {
             gameID = parentGame.gameID;
@@ -836,9 +807,9 @@ namespace GameTrackerEx01
             played = parentGame.played;
             DLCIDs = parentGame.DLCIDs;
         }
-
         public void SaveGameUpdates()
         {
+            UpdateAllGenreStats();
             switch (true)
             {
                 case var _ when completed:
