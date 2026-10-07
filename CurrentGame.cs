@@ -142,7 +142,25 @@ namespace GameTrackerEx01
 
         public void EditChildDetails()
         {
-            
+            Console.WriteLine($"What further details would you like to edit about {gameName}?\n");
+            Console.WriteLine("1. Edit hours played");
+            Console.WriteLine("2. Edit rating");
+            Console.WriteLine("3. Edit initial excitement level");
+            Console.WriteLine("4. Edit sequel status");
+            Console.WriteLine("5. Edit log messages");
+            Console.WriteLine("6. Edit main play device");
+            Console.WriteLine("7. Edit modded playthrough status");
+            Console.WriteLine("8. Edit play dates");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(8, $"What would you like to edit about {gameName}?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Console.WriteLine("This functionality is not yet implemented");
+                    break;
+            }
         }
 
         public string DisplayCurrentGameInfo()

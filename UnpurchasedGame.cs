@@ -91,12 +91,22 @@ namespace GameTrackerEx01
 
         public void EditFullPrice()
         {
-
+            Console.WriteLine($"The current full price for {gameName} on file is ${fullPrice}\nWhat is the new full price cost?");
+            float newPrice = Format.ConvertStringToCost(Console.ReadLine(), $"What is the new full price cost for {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update the full price for {gameName} from ${fullPrice} to ${newPrice}? (y/n)"))
+            {
+                fullPrice = newPrice;
+            }
         }
 
         public void EditSalePrice()
         {
-
+            Console.WriteLine($"The current discounted price for {gameName} on file is ${lowestSalePrice}\nWhat is the new lowest discounted cost?");
+            float newPrice = Format.ConvertStringToCost(Console.ReadLine(), $"What is the new lowest discounted cost for {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update the discounted price for {gameName} from ${lowestSalePrice} to ${newPrice}? (y/n)"))
+            {
+                lowestSalePrice = newPrice;
+            }
         }
 
         public (float fullPrice, float salePrice) ReadPricing()
@@ -115,9 +125,91 @@ namespace GameTrackerEx01
             //Remove this object
         }
 
+        public void CheckIfReleased()
+        {
+            if (releaseDate >= DateOnly.FromDateTime(DateTime.Now))
+            {
+                released = true;
+            }
+        }
+
+        public void EditPricing()
+        {
+            if (released)
+            {
+                Console.WriteLine($"What price to you want to change?\n");
+                Console.WriteLine("1. Edit full price");
+                Console.WriteLine("2. Edit lowest discounted price");
+                Console.WriteLine("0. Go back");
+                int userInput = Format.GetSingleResponse(2, $"What price do you want to edit?");
+                switch (userInput)
+                {
+                    case 0:
+                        return;
+                    case 1:
+                        EditFullPrice();
+                        break;
+                    case 2:
+                        EditSalePrice();
+                        break;
+                }
+                SaveGameUpdates();
+            } 
+            else
+            {
+                EditFullPrice();
+            }
+            
+        }
+
+        public void EditReleaseDate()
+        {
+            if (released && !Format.GetClosedAnswer($"According to your records, {gameName} has already released. Are you sure you want to revert this? (y/n)"))
+            {
+                return;
+            } else
+            {
+                if (!released)
+                {
+                    Console.WriteLine($"Your records have {gameName} releasing on {releaseDate.ToString("dd/MM/yyyy")}");
+                }
+                DateOnly newReleaseDate = DateOnly.FromDateTime(Format.GetDateValue($"new release date for {gameName} in format dd/MM/yyyy\nIf game does not have exact date please input the final date within its release window"));
+                if (Format.GetClosedAnswer($"Are you sure you want to update the release date for {gameName} from {releaseDate.ToString("dd/MM/yyyy")} to {newReleaseDate.ToString("dd/MM/yyyy")}? (y/n)"))
+                {
+                    releaseDate = newReleaseDate;
+                }
+                CheckIfReleased();
+            }
+            SaveGameUpdates();
+
+        }
+
         public void EditChildDetails()
         {
-            
+            Console.WriteLine($"What further details would you like to edit about {gameName}?\n");
+            Console.WriteLine("1. Edit excitement status");
+            Console.WriteLine("2. Edit sequel status");
+            Console.WriteLine("3. Edit pricing");
+            Console.WriteLine("4. Edit release date");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(4, $"What would you like to edit about {gameName}?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    EditExcitementLevel();
+                    break;
+                case 2:
+                    EditSequelStatus();
+                    break;
+                case 3:
+                    EditPricing();
+                    break;
+                case 4:
+                    EditReleaseDate();
+                    break;
+            }
         }
 
         public string DisplayUnpurchasedGameInfo()

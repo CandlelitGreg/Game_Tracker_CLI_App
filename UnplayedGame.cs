@@ -61,11 +61,7 @@ namespace GameTrackerEx01
                 if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
                 {
                     sequel = true;
-                    previousEntryID = GetPrequelStatus();
-                    if (previousEntryID == -1) sequel = false;
-                    backloggedVersion.previousEntryID = previousEntryID;
-                    backloggedVersion.sequel = sequel;
-                    backloggedVersion.SaveGameInfo();
+                    GetPrequelStatus();
                 }
             } else {
                 UnpurchasedGame unpurchasedVersion = new UnpurchasedGame();
@@ -75,16 +71,13 @@ namespace GameTrackerEx01
                 if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
                 {
                     sequel = true;
-                    previousEntryID = GetPrequelStatus();
-                    if (previousEntryID == -1) sequel = false;
-                    unpurchasedVersion.previousEntryID = previousEntryID;
-                    unpurchasedVersion.sequel = sequel;
-                    unpurchasedVersion.SaveGameInfo();
+                    GetPrequelStatus();
+                    
                 }
             }
         }
 
-        public int GetPrequelStatus()
+        public void GetPrequelStatus()
         {
             Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
             Console.WriteLine($"Please input the name of the game preceeding {gameName} in the franchise of {gameFranchise.franchiseName}.");
@@ -93,16 +86,17 @@ namespace GameTrackerEx01
             {
                 for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    Console.WriteLine($"franchiseEntryIDs should have {gameFranchise.franchiseEntryIDs.Length} entries, and the current index is {i} and the current gameID is {gameFranchise.franchiseEntryIDs[i]}");
-                    if (Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]) == null)
-                    {
-                        Console.WriteLine($"Game with ID {gameFranchise.franchiseEntryIDs[i]} could not be found in our records.");
-                    }
-                    Console.WriteLine($"Comparing {previousEntry.ToLower()} to {Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower()}");
+                    // Console.WriteLine($"franchiseEntryIDs should have {gameFranchise.franchiseEntryIDs.Length} entries, and the current index is {i} and the current gameID is {gameFranchise.franchiseEntryIDs[i]}");
+                    // if (Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]) == null)
+                    // {
+                    //     Console.WriteLine($"Game with ID {gameFranchise.franchiseEntryIDs[i]} could not be found in our records.");
+                    // }
+                    // Console.WriteLine($"Comparing {previousEntry.ToLower()} to {Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower()}");
                     string nextIDName = Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower();
                     if (previousEntry.ToLower() == nextIDName)
                     {
-                        return gameFranchise.franchiseEntryIDs[i];
+                        previousEntryID = gameFranchise.franchiseEntryIDs[i];
+                        Menu.FindGameByID(previousEntryID).SetSequel(gameID);
                     }
                 }
             }
@@ -111,24 +105,28 @@ namespace GameTrackerEx01
                 VideoGame titleSearch = Menu.FindGameByTitle(previousEntry);
                 if (titleSearch != null)
                 {
-                    return titleSearch.gameID;
+                    previousEntryID = titleSearch.gameID;
+                    Menu.FindGameByID(previousEntryID).SetSequel(gameID);
                 } else {
                     if (Format.GetClosedAnswer($"{previousEntry} could not be found in our records. Would you like to add it? (y/n)"))
                     {
                         VideoGame previousGame = new VideoGame();
                         previousGame.AddGameFromFranchise(previousEntry, franchiseID);
-                        return previousGame.gameID;
+                        previousEntryID = previousGame.gameID;
+                        Menu.FindGameByID(previousEntryID).SetSequel(gameID);
                     } else {
                         if (Format.GetClosedAnswer($"Would you like to try find the game preceeding {gameName} again? (y/n)"))
                         {
-                            return GetPrequelStatus();
+                            GetPrequelStatus();
+                            return;
                         } else {
-                            return -1;
+                            previousEntryID = -1;
                         }
                     }
                 }
             }
-            return -1;
+            sequel = (previousEntryID == -1) ? false : true;
+            SaveGameUpdates();
         }
 
         public bool CheckWaitingForPreviousEntry()
@@ -152,14 +150,71 @@ namespace GameTrackerEx01
 
         }
 
+        public void EditSequelStatus()
+        {
+            if (previousEntryID == -1)
+            {
+                EditSequel();
+                return;
+            }
+            Console.WriteLine($"What do you want to change regarding {gameName}'s prequel?\n");
+            Console.WriteLine("1. Edit prequel details");
+            Console.WriteLine("2. Remove prequel requirement");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(2, $"What price do you want to edit?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    EditSequel();
+                    break;
+                case 2:
+                    RemovePrequel();
+                    break;
+            }
+            SaveGameUpdates();
+        }
+
+        public void RemovePrequel()
+        {
+            if(Format.GetClosedAnswer($"Are you sure you want to remove {Menu.FindGameByID(previousEntryID).gameName} as the prequel to {gameName}? (y/n)"))
+            {
+                Menu.FindGameByID(previousEntryID).RemoveFromSequel(gameID);
+                previousEntryID = -1;
+            }
+        }
+
         public void EditSequel()
         {
-
+            if (franchiseID == -1 && Format.GetClosedAnswer($"{gameName} is not attached to any existing franchise, you will have to attach it to an existing or new franchise in order to alter it's sequel status\nWould you like to attach {gameName} to a franchise? (y/n)"))
+            {
+                AddToFranchise();
+            }
+            if (franchiseID == -1)
+            {
+                Console.WriteLine($"{gameName} could not have its sequel status altered as it is not part of a franchise");
+                return;
+            }
+            
+            if (!sequel && !Format.GetClosedAnswer($"{gameName} is currently labeled as not being a sequel, are you sure you want to change this? (y/n)"))
+            {
+                return;
+            }
+            GetPrequelStatus();
+            Console.WriteLine($"{gameName} is now set as the sequel to {Menu.FindGameByID(previousEntryID).gameName}");
+            SaveGameUpdates();
         }
 
         public void EditExcitementLevel()
         {
-
+            Console.WriteLine($"The current excitement level for {gameName} on file is {excitementLevel}\nWhat is the your updated excitement level?");
+            int newExcitement = Format.ConvertStringToInt(Console.ReadLine(), $"What is your updated excitement level for {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update your excitement level for {gameName} from {excitementLevel} to {newExcitement}? (y/n)"))
+            {
+                excitementLevel = newExcitement;
+            }
+            SaveGameUpdates();
         }
 
         public int ReadExcitement()

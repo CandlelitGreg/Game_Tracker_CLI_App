@@ -2,15 +2,15 @@ gameID,gameName,avgGameLength,gameGenreIDs,deckPlayable,sessionGame,worthComplet
 0,Doom Eternal,15,0;1;2;3,True,False,False,0,False,True,False,False,,8,True,1,01/01/2001
 3,Assassin's Creed: Brotherhood,15,4;5;6;7,True,False,False,1,False,True,False,False,,7,True,2,01/01/2001
 4,Resident Evil 4,16,2;8;9,True,False,True,2,False,True,False,False,,8,True,5,01/01/2025
-15,Halo 4,7,0;3;21;22;23,True,False,False,5,False,True,False,False,,8,False,16,01/01/2020
-16,Halo 3: ODST,6,0;3;21;22;23,True,False,False,5,False,True,False,False,,8,False,17,01/01/2020
-17,Halo 3,7.5,0;3;21;22;23,True,False,False,5,False,True,False,False,,9,False,18,01/01/2001
+15,Halo 4,7,0;3;21;22;23,True,False,False,5,False,True,False,False,,8,True,16,01/01/2020
+16,Halo 3: ODST,6,0;3;21;22;23,True,False,False,5,False,True,False,False,,8,True,17,01/01/2020
+17,Halo 3,7.5,0;3;21;22;23,True,False,False,5,False,True,False,False,,9,True,18,01/01/2001
 22,Halo Reach,7.5,0;3;21;22;23,True,False,False,5,False,True,False,False,,9,False,-1,01/01/2001
-23,Borderlands 3,23.5,0;3;21;22;26;29;30,True,True,False,7,False,True,False,False,,7,False,-1,01/01/2001
-24,Borderlands: The Pre-Sequel,18,0;3;21;22;26;29;30;31,True,True,False,7,False,True,False,False,,9,False,-1,01/01/2001
+23,Borderlands 3,23.5,0;3;21;22;26;29;30,True,True,False,7,False,True,False,False,,7,True,24,01/01/2001
+24,Borderlands: The Pre-Sequel,18,0;3;21;22;26;29;30;31,True,True,False,7,False,True,False,False,,9,True,26,01/01/2001
 25,Tiny Tina's Wonderlands,16,0;3;10;11;12;21;22;26;27;29;30;31,True,True,False,7,False,True,False,False,,9,True,23,01/01/2025
-28,Star Wars Jedi: Survivor,20.5,3;21;23;24;25,True,False,True,8,False,True,False,False,,9,False,-1,01/01/2026
-33,Hollow Knight: Silksong,28,3;12;25;32;33,True,False,False,10,False,True,False,False,,6,False,-1,09/12/2025
+28,Star Wars Jedi: Survivor,20.5,3;21;23;24;25,True,False,True,8,False,True,False,False,,9,True,29,01/01/2026
+33,Hollow Knight: Silksong,28,3;12;25;32;33,True,False,False,10,False,True,False,False,,6,True,32,09/12/2025
 34,Monster Hunter: Rise,23.5,3;11;12;24;25;26;27,True,True,False,11,False,True,False,False,,8,True,35,01/01/2024
 44,Final Fantasy VII Remake,32,12;23;27;41;42,True,False,False,14,False,True,False,False,,9,False,-1,01/01/2025
 45,Final Fantasy VII Rebirth,48.5,4;12;23;27;41;42,True,False,False,14,False,True,False,False,,9,True,44,01/01/2026

@@ -75,30 +75,35 @@ namespace GameTrackerEx01
             //Check franchise status
             if (Format.GetClosedAnswer($"Is {gameName} part of a larger franchise? (y/n)"))
             {
-                Console.WriteLine($"Please select the franchise {gameName} is a part of:");
-                for (int i = 0; i < Menu.existingFranchises.Count; i++)
-                {
-                    Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
-                }
-                Console.WriteLine($"\n0. If {gameName} is part of an unlisted franchise please press 0\n");
-                int franchiseInput = Format.GetSingleResponse(Menu.existingFranchises.Count + 1, $"Please select the franchise {gameName} is a part of:");
-                if (franchiseInput == 0)
-                {
-                    franchiseID = Menu.AddNewFranchise();
-                } 
-                else 
-                {
-                    franchiseID = Menu.existingFranchises[franchiseInput-1].franchiseID;
-                }
-
-                //Add game to franchise
-                if (franchiseID != -1)
-                {
-                    Menu.AddGameToFranchise(gameID, franchiseID);
-                }
+                AddToFranchise();
             }
 
             GetGameInfo();
+        }
+
+        public void AddToFranchise()
+        {
+            Console.WriteLine($"Please select the franchise {gameName} is a part of:");
+            for (int i = 0; i < Menu.existingFranchises.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {Menu.existingFranchises[i].franchiseName}");
+            }
+            Console.WriteLine($"\n0. If {gameName} is part of an unlisted franchise please press 0\n");
+            int franchiseInput = Format.GetSingleResponse(Menu.existingFranchises.Count + 1, $"Please select the franchise {gameName} is a part of:");
+            if (franchiseInput == 0)
+            {
+                franchiseID = Menu.AddNewFranchise();
+            } 
+            else 
+            {
+                franchiseID = Menu.existingFranchises[franchiseInput-1].franchiseID;
+            }
+
+            //Add game to franchise
+            if (franchiseID != -1)
+            {
+                Menu.AddGameToFranchise(gameID, franchiseID);
+            }
         }
 
 
@@ -365,6 +370,80 @@ namespace GameTrackerEx01
             }
         }
 
+        public void RemoveFromSequel(int sequelID)
+        {
+            if (played)
+            {
+                switch (true)
+                {
+                    case var _ when completed:
+                        CompletedGame cg = Menu.FindDetailedGameByID<CompletedGame>(gameID);
+                        if (cg.nextEntryID == sequelID) cg.nextEntryID = -1;
+                        break;
+                    case var _ when playing:
+                        CurrentGame pg = Menu.FindDetailedGameByID<CurrentGame>(gameID);
+                        if (pg.nextEntryID == sequelID) pg.nextEntryID = -1;
+                        break;
+                    case var _ when !completed && !playing:
+                        DroppedGame dg = Menu.FindDetailedGameByID<DroppedGame>(gameID);
+                        if (dg.nextEntryID == sequelID) dg.nextEntryID = -1;
+                        break;
+                }
+            }
+            else
+            {
+                switch (true)
+                {
+                    case var _ when !purchased:
+                        UnpurchasedGame ug = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID);
+                        if (ug.previousEntryID == sequelID) ug.previousEntryID = -1;
+                        break;
+                    case var _ when purchased:
+                        BackloggedGame bg = Menu.FindDetailedGameByID<BackloggedGame>(gameID);
+                        if (bg.previousEntryID == sequelID) bg.previousEntryID = -1;
+                        break;
+                }
+            }
+            SaveGameUpdates();
+        }
+
+        public void SetSequel(int sequelID)
+        {
+            if (played)
+            {
+                switch (true)
+                {
+                    case var _ when completed:
+                        CompletedGame cg = Menu.FindDetailedGameByID<CompletedGame>(gameID);
+                        if (cg.nextEntryID != -1 && cg.nextEntryID != sequelID && Format.GetClosedAnswer($"{Menu.FindGameByID(cg.nextEntryID).gameName} is currently saved as the sequel to {gameName}\nAre you sure you want to overwrite this and make {Menu.FindGameByID(sequelID).gameName} the sequel instead? (y/n)"))
+                        {
+                            Menu.FindGameByID(cg.nextEntryID).RemoveFromSequel(gameID);
+                        }
+                        cg.nextEntryID = sequelID;
+                        Console.WriteLine($"Completed game: {gameName} is adding the sequel {Menu.FindGameByID(sequelID).gameName} to file");
+                        break;
+                    case var _ when playing:
+                        CurrentGame pg = Menu.FindDetailedGameByID<CurrentGame>(gameID);
+                        if (pg.nextEntryID != -1 && pg.nextEntryID != sequelID && Format.GetClosedAnswer($"{Menu.FindGameByID(pg.nextEntryID).gameName} is currently saved as the sequel to {gameName}\nAre you sure you want to overwrite this and make {Menu.FindGameByID(sequelID).gameName} the sequel instead? (y/n)"))
+                        {
+                            Menu.FindGameByID(pg.nextEntryID).RemoveFromSequel(gameID);
+                        }
+                        pg.nextEntryID = sequelID;
+                        break;
+                    case var _ when !completed && !playing:
+                        DroppedGame dg = Menu.FindDetailedGameByID<DroppedGame>(gameID);
+                        if (dg.nextEntryID != -1 && dg.nextEntryID != sequelID && Format.GetClosedAnswer($"{Menu.FindGameByID(dg.nextEntryID).gameName} is currently saved as the sequel to {gameName}\nAre you sure you want to overwrite this and make {Menu.FindGameByID(sequelID).gameName} the sequel instead? (y/n)"))
+                        {
+                            Menu.FindGameByID(dg.nextEntryID).RemoveFromSequel(gameID);
+                        }
+                        dg.nextEntryID = sequelID;
+                        break;
+                }
+                SaveGameUpdates();
+            }
+            
+        }
+
         public string ReadTitle()
         {
             return gameName;
@@ -624,6 +703,7 @@ namespace GameTrackerEx01
                                 bool filterPlaying = false,
                                 bool filterDropped = false,
                                 bool filterNotPurchased = false,
+                                bool filterDeckPlayable = false,
                                 bool avgLengthMatters = false,
                                 int avgLengthBase = 0,
                                 int avgLengthDeviation = 0,
@@ -663,29 +743,29 @@ namespace GameTrackerEx01
             }
             if (filterCompleted && completed)
             {
-                recommendable = false;
+                return false;
             }
             if (filterPlayed && played)
             {
-                recommendable = false;
+                return false;
             }
             if (filterPlaying && playing)
             {
-                recommendable = false;
+                return false;
             }
             if (filterDropped && played && !playing && !completed)
             {
-                recommendable = false;
+                return false;
             }
             if (filterNotPurchased && !purchased)
             {
-                recommendable = false;
+                return false;
             }
             if (avgLengthMatters)
             {
                 if ((avgGameLength > avgLengthBase && avgGameLength - avgLengthDeviation > avgLengthBase) || (avgGameLength < avgLengthBase && avgGameLength + avgLengthDeviation < avgLengthBase))
                 {
-                    recommendable = false;
+                    return false;
                 } 
             }
             if (requiresCertainExcitement)
@@ -698,39 +778,43 @@ namespace GameTrackerEx01
                             BackloggedGame backloggedVersion = Menu.FindDetailedGameByID<BackloggedGame>(gameID);
                             if (backloggedVersion.excitementLevel < requiredExcitementLevelOrRating)
                             {
-                                recommendable = false;
+                                return false;
                             }
                             break;
                         case var _ when !purchased && !played:
                             UnpurchasedGame unpurchasedVersion = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID);
                             if (unpurchasedVersion.excitementLevel < requiredExcitementLevelOrRating)
                             {
-                                recommendable = false;
+                                return false;
                             }
                             break;
                         case var _ when played && !completed && !playing:
                             DroppedGame droppedVersion = Menu.FindDetailedGameByID<DroppedGame>(gameID);
                             if (droppedVersion.rating < requiredExcitementLevelOrRating)
                             {
-                                recommendable = false;
+                                return false;
                             }
                             break;
                         case var _ when completed:
                             CompletedGame completedVersion = Menu.FindDetailedGameByID<CompletedGame>(gameID);
                             if (completedVersion.rating < requiredExcitementLevelOrRating)
                             {
-                                recommendable = false;
+                                return false;
                             }
                             break;
                         case var _ when playing:
                             CurrentGame playingVersion = Menu.FindDetailedGameByID<CurrentGame>(gameID);
                             if (playingVersion.rating < requiredExcitementLevelOrRating)
                             {
-                                recommendable = false;
+                                return false;
                             }
                             break;
                     }
                 }
+            }
+            if (filterDeckPlayable && !deckPlayable)
+            {
+                return false;
             }
             return recommendable;
         }

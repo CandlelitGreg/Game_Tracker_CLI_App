@@ -65,9 +65,33 @@ namespace GameTrackerEx01
             SaveGameInfo();
         }
 
+        public void EditPurchaseDate()
+        {
+            Console.WriteLine("Functionality not yet implemented");
+        }
+
         public void EditChildDetails()
         {
-            
+            Console.WriteLine($"What further details would you like to edit about {gameName}?\n");
+            Console.WriteLine("1. Edit excitement status");
+            Console.WriteLine("2. Edit sequel status");
+            Console.WriteLine("3. Edit purchase date");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(3, $"What would you like to edit about {gameName}?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    EditExcitementLevel();
+                    break;
+                case 2:
+                    EditSequelStatus();
+                    break;
+                case 3:
+                    EditPurchaseDate();
+                    break;
+            }
         }
 
         public string DisplayBackloggedGameInfo()

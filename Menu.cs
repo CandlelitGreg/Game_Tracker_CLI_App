@@ -50,6 +50,7 @@ namespace GameTrackerEx01
             existingCompletedGames = DownloadInfo<CompletedGame>(mainFiles.completedGameFile);
             existingDroppedGames = DownloadInfo<DroppedGame>(mainFiles.droppedGameFile);
             existingUnpurchasedGames = DownloadInfo<UnpurchasedGame>(mainFiles.unpurchasedGameFile);
+            CheckAllReleaseDates();
             existingBackloggedGames = DownloadInfo<BackloggedGame>(mainFiles.backloggedGameFile);
             var allGames = GetAllVideoGames();
             existingVideoGames.AddRange(allGames.vgs);
@@ -459,6 +460,16 @@ namespace GameTrackerEx01
             return (vgs, replays);
         }
 
+        public static void CheckAllReleaseDates()
+        {
+            for (int i = 0; i < existingUnpurchasedGames.Count; i++)
+            {
+                if (!existingUnpurchasedGames[i].released)
+                {
+                    existingUnpurchasedGames[i].CheckIfReleased();
+                }
+            }
+        }
         public static void HomePage()
         {
             
