@@ -8,29 +8,15 @@ namespace GameTrackerEx01
 {
     public static class CSVHandler
     {
-        public static void UpdateVideoGame()
+        public static void UpdateAllFiles()
         {
-
-        }
-
-        public static void UpdatePlayedGame()
-        {
-
-        }
-
-        public static void UpdateDroppedGame()
-        {
-
-        }
-
-        public static void UpdateUnplayedGame()
-        {
-
-        }
-
-        public static void UpdateUnpurchasedGame()
-        {
-
+            UpdateInfoFile<Genre>(Menu.existingGenres, Menu.mainFiles.genreFile);
+            UpdateInfoFile<Franchise>(Menu.existingFranchises, Menu.mainFiles.franchiseFile);
+            UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
+            UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, Menu.mainFiles.completedGameFile);
+            UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, Menu.mainFiles.droppedGameFile);
+            UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, Menu.mainFiles.unpurchasedGameFile);
+            UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, Menu.mainFiles.backloggedGameFile);
         }
 
         public static void UpdateInfoFile<T>(List<T> infoData, string filepath)

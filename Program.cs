@@ -12,6 +12,7 @@ namespace GameTrackerEx01
             // CSVHandler.CreateRefresh();
             Menu.GetStats();
             HomePage();
+            CSVHandler.UpdateAllFiles();
             // if (Format.GetClosedAnswer("Would you like to add a new game to the tracker? (y/n)\n"))
             // {
             //     VideoGame newGame = new VideoGame();

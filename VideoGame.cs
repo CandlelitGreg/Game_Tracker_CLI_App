@@ -698,7 +698,7 @@ namespace GameTrackerEx01
         public bool ReadyToRecommend(
                                 bool filterWaitingForPrequel = false, 
                                 bool filterUnreleased = false, 
-                                bool filterCompleted = false, 
+                                bool filterReplays = false, 
                                 bool filterPlayed = false,
                                 bool filterPlaying = false,
                                 bool filterDropped = false,
@@ -711,6 +711,10 @@ namespace GameTrackerEx01
                                 int requiredExcitementLevelOrRating = 0)
         {
             bool recommendable = true;
+            if (completed && !Menu.FindDetailedGameByID<CompletedGame>(gameID).wantToPlayAgain)
+            {
+                return false;
+            }
             if (filterWaitingForPrequel)
             {
                 switch (true)
@@ -741,7 +745,7 @@ namespace GameTrackerEx01
             {
                 recommendable = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).released;
             }
-            if (filterCompleted && completed)
+            if (filterReplays && completed)
             {
                 return false;
             }

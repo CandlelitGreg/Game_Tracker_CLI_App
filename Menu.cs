@@ -56,6 +56,7 @@ namespace GameTrackerEx01
             existingVideoGames.AddRange(allGames.vgs);
             existingReplays.AddRange(allGames.replays);
             SortGameLists();
+            RecalculateAllGenreStats();
             Console.WriteLine($"There are {existingVideoGames.Count} total games in the tracker\n");
             for (int i = 0; i < existingVideoGames.Count; i++)
             {
@@ -71,7 +72,8 @@ namespace GameTrackerEx01
             Console.WriteLine($"\nThere are {existingGenres.Count} total genres in the tracker\n");
             for (int i = 0; i < existingGenres.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {existingGenres[i].genreName}");
+                Console.WriteLine($"{i + 1}.");
+                existingGenres[i].ViewGenreAverages();
             }
         }
 
@@ -470,6 +472,15 @@ namespace GameTrackerEx01
                 }
             }
         }
+        
+        public static void RecalculateAllGenreStats()
+        {
+            for (int i = 0; i < existingGenres.Count; i++)
+            {
+                existingGenres[i].RecalculateGenreStats();
+            }
+        }
+        
         public static void HomePage()
         {
             
