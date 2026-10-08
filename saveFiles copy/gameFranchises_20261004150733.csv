@@ -12,6 +12,6 @@ franchiseID,franchiseName,franchiseEntryIDs,franchiseGenreIDs,avgFranchiseRating
 10,Hollow Knight,32;33,3;25;32;33,0
 11,Monster Hunter,34;35,3;11;12;24;25;26;27,0
 12,Dark Souls,36;38;37,3;10;12;24;25;27;26,0
-13,Batman: Arkham,40;41;42;43,39;35;6;3;23;42,0
+13,Batman: Arkham,40;41;42;43,39;35;6;3;23;40;42,0
 14,Final Fantasy,44;45,12;23;27;41;42,0
 15,Metro,46;47;48,0;2;3;8;23;43,0

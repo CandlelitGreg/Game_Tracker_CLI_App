@@ -673,7 +673,9 @@ namespace GameTrackerEx01
                                 int avgLengthBase = 0,
                                 int avgLengthDeviation = 0,
                                 bool requiresCertainExcitement = false,
-                                int requiredExcitementLevelOrRating = 0)
+                                int requiredExcitementLevelOrRating = 0,
+                                bool onlySessionGames = false,
+                                bool ignoreSessionGames = false)
         {
             bool recommendable = true;
             if (completed && !Menu.FindDetailedGameByID<CompletedGame>(gameID).wantToPlayAgain)
@@ -782,6 +784,14 @@ namespace GameTrackerEx01
                 }
             }
             if (filterDeckPlayable && !deckPlayable)
+            {
+                return false;
+            }
+            if (onlySessionGames && !sessionGame)
+            {
+                return false;
+            }
+            if (ignoreSessionGames && sessionGame)
             {
                 return false;
             }

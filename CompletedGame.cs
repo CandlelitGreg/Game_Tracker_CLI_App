@@ -1,3 +1,4 @@
+using System.Data.Common;
 using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
@@ -142,6 +143,73 @@ namespace GameTrackerEx01
             return Format.ReturnCommasToString(review);
         }
 
+        public void EditPlayAgainStatus()
+        {
+            if (wantToPlayAgain && Format.GetClosedAnswer($"Are you sure you would like to remove your desire to replay {gameName} from your files? (y/n)"))
+            {
+                wantToPlayAgain = false;
+            }
+            else if (!wantToPlayAgain && Format.GetClosedAnswer($"Are you sure you would like to add your desire to replay {gameName} from your files? (y/n)"))
+            {
+                wantToPlayAgain = true;
+            }
+            SaveGameUpdates();
+        }
+        public void AlterStartDate()
+        {
+            if (firstPlayedDate != null)
+            {
+                Console.WriteLine($"The currently recorded start date for {gameName} is {firstPlayedDate.ToString("dd/MM/yyyy")}");
+            }
+            DateOnly newStart = DateOnly.FromDateTime(Format.GetDateValue($"new date you first played {gameName} in format dd/MM/yyyy"));
+            if (firstPlayedDate != null && !Format.GetClosedAnswer($"Are you sure you want to change the first date you played {gameName} to be {newStart.ToString("dd/MM/yyyy")} instead of {firstPlayedDate}? (y/n)"))
+            {
+                return;
+            }
+            firstPlayedDate = newStart;
+        }
+        public void AlterCompletionDate()
+        {
+            Console.WriteLine($"{gameName} is currently recorded to have been completed on {completionDate.ToString("dd/MM/yyyy")}");
+            DateOnly newCompletion = DateOnly.FromDateTime(Format.GetDateValue($"new date you finished playing {gameName} in format dd/MM/yyyy"));
+            if (!Format.GetClosedAnswer($"Are you sure you want to change the completion date for {gameName} to be {newCompletion.ToString("dd/MM/yyyy")} instead of {completionDate}? (y/n)"))
+            {
+                return;
+            }
+            completionDate = newCompletion;
+        }
+        public void EditCompletionDates()
+        {
+            Console.WriteLine($"What date would you like to change regarding {gameName}'s completion?\n");
+            Console.WriteLine("1. Edit first played date");
+            Console.WriteLine("2. Edit date completed");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(2, $"What date would you like to edit?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    AlterStartDate();
+                    break;
+                case 2:
+                    AlterCompletionDate();
+                    break;
+            }
+            SaveGameUpdates();
+        }
+
+        public void AlterReview()
+        {
+            Console.WriteLine($"Your current review for {gameName} is as follows:\n -----   -----   -----\n{review}\n -----   -----   -----\nWhat would you like to have as your new review?");
+            string newReview = Format.CheckForCommas(Console.ReadLine(), $"new review for {gameName}");
+            if (Format.GetClosedAnswer($"Are you sure you want to remove your old review for {gameName} and replace it with:\n -----   -----   -----\n{review}\n -----    -----   -----\nWe suggest selecting NO if you are not sure as your previous review will be lost unless you have a backup of your files. (y/n)"))
+            {
+                review = newReview;
+            }
+            SaveGameUpdates();
+        }
+
         public void EditChildDetails()
         {
             Console.WriteLine($"What further details would you like to edit about {gameName}?\n");
@@ -152,7 +220,7 @@ namespace GameTrackerEx01
             Console.WriteLine("5. Edit log messages");
             Console.WriteLine("6. Edit main play device");
             Console.WriteLine("7. Edit modded playthrough status");
-            Console.WriteLine("8. Edit completion details");
+            Console.WriteLine("8. Edit completion dates");
             if (wantToPlayAgain)
             {
                 Console.WriteLine("9. Set 'want to replay' to false");
@@ -162,13 +230,44 @@ namespace GameTrackerEx01
                 Console.WriteLine("9. Set 'want to replay' to true");
             }
             Console.WriteLine("10. Edit review");
-            Console.WriteLine("11. Edit replay information");
+            // Console.WriteLine("11. Edit replay information");
             Console.WriteLine("0. Go back");
-            int userInput = Format.GetSingleResponse(11, $"What would you like to edit about {gameName}?");
+            int userInput = Format.GetSingleResponse(10, $"What would you like to edit about {gameName}?");
             switch (userInput)
             {
                 case 0:
                     return;
+                case 1:
+                    EditHoursPlayed();
+                    break;
+                case 2:
+                    EditRating();
+                    break;
+                case 3:
+                    EditInitialExcitement();
+                    break;
+                case 4:
+                    EditSequelStatus();
+                    break;
+                case 5:
+                    //vvvv TODO: Change log storage to log IDs - make log class object - make logs get saved in seperate file that gets called from by id vvvv
+                    EditLogs();
+                    break;
+                case 6:
+                    ChangePlayDevice();
+                    break;
+                case 7:
+                    ChangeModdedStatus();
+                    break;
+                case 8:
+                    EditCompletionDates();
+                    break;
+                case 9:
+                    EditPlayAgainStatus();
+                    break;
+                case 10:
+                    AlterReview();
+                    break;
                 default:
                     Console.WriteLine("This functionality is not yet implemented");
                     break;

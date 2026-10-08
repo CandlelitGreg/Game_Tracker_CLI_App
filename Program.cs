@@ -136,7 +136,31 @@ namespace GameTrackerEx01
 
         public static void GetSpecificGameRecommendation()
         {
+            // bool[] searchFilters = [false,false,false,false,false,false,false]
+            //Do you want to play a session game?
 
+
+            //Do you want to ignore session games?
+
+
+            //Do you want a specific genre?
+                //If so, what genres are you keen for?
+
+                //Use these genres to filter the games down initially
+            
+            //How long a game are you looking for - press 0 for "doesn't matter"
+
+            //Do you want to include replays?
+
+            //Do you want to include dropped games?
+
+            //Do you want to include unpurchased games?
+
+            //Do you want to include games that won't play on the steam deck?
+
+            //Do you want a random game, or a game that you have been keen for?
+
+            
         }
 
         

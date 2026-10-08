@@ -161,7 +161,7 @@ namespace GameTrackerEx01
             Console.WriteLine("1. Edit prequel details");
             Console.WriteLine("2. Remove prequel requirement");
             Console.WriteLine("0. Go back");
-            int userInput = Format.GetSingleResponse(2, $"What price do you want to edit?");
+            int userInput = Format.GetSingleResponse(2, $"What do you want to change regarding {gameName}'s prequel?");
             switch (userInput)
             {
                 case 0:

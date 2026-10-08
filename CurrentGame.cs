@@ -118,6 +118,66 @@ namespace GameTrackerEx01
 
         }
 
+        public void AlterStartDate()
+        {
+            if (firstPlayedDate != null)
+            {
+                Console.WriteLine($"The currently recorded start date for {gameName} is {firstPlayedDate.ToString("dd/MM/yyyy")}");
+            }
+            DateOnly newStart = DateOnly.FromDateTime(Format.GetDateValue($"new date you first played {gameName} in format dd/MM/yyyy"));
+            if (firstPlayedDate != null && !Format.GetClosedAnswer($"Are you sure you want to change the first date you played {gameName} to be {newStart.ToString("dd/MM/yyyy")} instead of {firstPlayedDate}? (y/n)"))
+            {
+                return;
+            }
+            firstPlayedDate = newStart;
+        }
+        public void AlterLastPlayedDate()
+        {
+            if (lastPlayed != null)
+            {
+                Console.WriteLine($"Currently, the last day you played {gameName} is {firstPlayedDate.ToString("dd/MM/yyyy")}");
+            }
+            DateOnly newLatest = DateOnly.FromDateTime(Format.GetDateValue($"most recent day you played {gameName} in format dd/MM/yyyy"));
+            if (lastPlayed != null && !Format.GetClosedAnswer($"Are you sure you want to change the last played date for {gameName} from {firstPlayedDate} to {newLatest.ToString("dd/MM/yyyy")}? (y/n)"))
+            {
+                return;
+            }
+            lastPlayed = newLatest;
+        }
+        public void EditPlayedDates()
+        {
+            Console.WriteLine($"What date would you like to change regarding {gameName}?\n");
+            Console.WriteLine("1. Edit first played date");
+            Console.WriteLine("2. Edit last played date");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(2, $"What date would you like to edit?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    AlterStartDate();
+                    break;
+                case 2:
+                    AlterLastPlayedDate();
+                    break;
+            }
+            SaveGameUpdates();
+        }
+
+        public void EditPreviouslyDropped()
+        {
+            if (previouslyDropped && Format.GetClosedAnswer($"Are you sure you would like to remove the previously dropped tag from {gameName} in your files? (y/n)"))
+            {
+                previouslyDropped = false;
+            }
+            else if (!previouslyDropped && Format.GetClosedAnswer($"Are you sure you would like to add the previously dropped tag from {gameName} in your files? (y/n)"))
+            {
+                previouslyDropped = true;
+            }
+            SaveGameUpdates();
+        }
+
         public void CreateLogEntry()
         {
             //Add log message
@@ -150,13 +210,42 @@ namespace GameTrackerEx01
             Console.WriteLine("5. Edit log messages");
             Console.WriteLine("6. Edit main play device");
             Console.WriteLine("7. Edit modded playthrough status");
-            Console.WriteLine("8. Edit play dates");
+            Console.WriteLine("8. Edit gaming dates");
+            Console.WriteLine("9. Edit previously dropped status");
             Console.WriteLine("0. Go back");
-            int userInput = Format.GetSingleResponse(8, $"What would you like to edit about {gameName}?");
+            int userInput = Format.GetSingleResponse(9, $"What would you like to edit about {gameName}?");
             switch (userInput)
             {
                 case 0:
                     return;
+                case 1:
+                    EditHoursPlayed();
+                    break;
+                case 2:
+                    EditRating();
+                    break;
+                case 3:
+                    EditInitialExcitement();
+                    break;
+                case 4:
+                    EditSequelStatus();
+                    break;
+                case 5:
+                    //vvvv TODO: Change log storage to log IDs - make log class object - make logs get saved in seperate file that gets called from by id vvvv
+                    EditLogs();
+                    break;
+                case 6:
+                    ChangePlayDevice();
+                    break;
+                case 7:
+                    ChangeModdedStatus();
+                    break;
+                case 8:
+                    EditPlayedDates();
+                    break;
+                case 9:
+                    EditPreviouslyDropped();
+                    break;
                 default:
                     Console.WriteLine("This functionality is not yet implemented");
                     break;

@@ -120,7 +120,7 @@ namespace GameTrackerEx01
 
 
         }
-        //TODO: Fix bug where newly created sequel is not attached to original game
+        //TODO: Fix bug where newly created sequel is not attached to original game ?? Fixed ?? (I believe so...)
         public int GetSequelStatus()
         {
             Franchise gameFranchise = Menu.existingFranchises[Menu.FindFranchise(franchiseID)];
@@ -193,10 +193,125 @@ namespace GameTrackerEx01
             return null;
         }
 
-        public void EditPlayAgainStatus()
+        public void EditHoursPlayed()
         {
-
+            Console.WriteLine($"You currently have {hoursPlayed} hours logged with {gameName} on file\nWhat is the your playtime?");
+            float newHours = Format.ConvertStringToFloat(Console.ReadLine(), $"What is your current playtime on {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update your hours played from {hoursPlayed} to {newHours} for {gameName}? (y/n)"))
+            {
+                hoursPlayed = newHours;
+            }
+            SaveGameUpdates();
         }
+
+        public void EditRating()
+        {
+            Console.WriteLine($"Your current rating on file for {gameName} is {rating}\nWhat is your updated rating?");
+            int newRating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating for {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update your rating of {gameName} from {rating} to {newRating}? (y/n)"))
+            {
+                rating = newRating;
+            }
+            SaveGameUpdates();
+        }
+
+        public void EditInitialExcitement()
+        {
+            Console.WriteLine($"Your initial excitement for {gameName} is currently {initialExcitementLevel}\nWhat would you like to change your initial excitement rating to?");
+            int newExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level for {gameName}?");
+            if (Format.GetClosedAnswer($"Are you sure you want to update your initial excitement level of {gameName} from {initialExcitementLevel} to {newExcitementLevel}? (y/n)\nThis statistic is intended to be representative of your very first thoughts after the first hour/s."))
+            {
+                initialExcitementLevel = newExcitementLevel;
+            }
+            SaveGameUpdates();
+        }
+
+        public void EditSequelStatus()
+        {
+            if (nextEntryID == -1)
+            {
+                EditSequel();
+                return;
+            }
+            Console.WriteLine($"What do you want to change regarding {gameName}'s sequel?\n");
+            Console.WriteLine("1. Edit sequel details");
+            Console.WriteLine("2. Remove attached sequel");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(2, $"What do you want to change about {gameName}'s sequel?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    EditSequel();
+                    break;
+                case 2:
+                    RemovePrequel();
+                    break;
+            }
+            SaveGameUpdates();
+        }
+
+        public void RemovePrequel()
+        {
+            if(Format.GetClosedAnswer($"Are you sure you want to remove {Menu.FindGameByID(nextEntryID).gameName} as the sequel to {gameName}? (y/n)"))
+            {
+                Menu.FindGameByID(nextEntryID).RemoveFromSequel(gameID);
+                nextEntryID = -1;
+            }
+        }
+
+        public void EditSequel()
+        {
+            if (franchiseID == -1 && Format.GetClosedAnswer($"{gameName} is not attached to any existing franchise, you will have to attach it to an existing or new franchise in order to alter it's sequel status\nWould you like to attach {gameName} to a franchise? (y/n)"))
+            {
+                AddToFranchise();
+            }
+            if (franchiseID == -1)
+            {
+                Console.WriteLine($"{gameName} could not have its sequel status altered as it is not part of a franchise");
+                return;
+            }
+            
+            if (nextEntryID == -1 && !Format.GetClosedAnswer($"{gameName} is currently labeled as not having a sequel, are you sure you want to change this? (y/n)"))
+            {
+                return;
+            }
+            GetSequelStatus();
+            Console.WriteLine($"{Menu.FindGameByID(nextEntryID).gameName} is now set as the sequel to {gameName}");
+            SaveGameUpdates();
+        }
+
+        public void EditLogs()
+        {
+            Console.WriteLine("The developer is yet to add the intended logs feature");
+        }
+
+        public void ChangePlayDevice()
+        {
+            Console.WriteLine($"You have currently recorded the {mainPlayDevice} as your main play device for {gameName}.\nWhat is your new main play device?");
+            string newDevice = Format.CheckForCommas(Console.ReadLine(), $"new main device used to play {gameName}");
+            if (Format.GetClosedAnswer($"Are you sure you want to update your main play device for {gameName} from {mainPlayDevice} to {newDevice}? (y/n)"))
+            {
+                mainPlayDevice = newDevice;
+            }
+            SaveGameUpdates();
+        }
+
+        public void ChangeModdedStatus()
+        {
+            if (modded && Format.GetClosedAnswer($"Are you sure you would like to remove the modded tag from {gameName}? (y/n)"))
+            {
+                modded = false;
+            }
+            else if (!modded && Format.GetClosedAnswer($"Are you sure you would like to add the modded tag from {gameName}? (y/n)"))
+            {
+                modded = true;
+            }
+            SaveGameUpdates();
+        }
+
+       
 
 
 
