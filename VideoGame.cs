@@ -670,8 +670,8 @@ namespace GameTrackerEx01
                                 bool filterNotPurchased = false,
                                 bool filterDeckPlayable = false,
                                 bool avgLengthMatters = false,
-                                int avgLengthBase = 0,
-                                int avgLengthDeviation = 0,
+                                float avgLengthBase = 0,
+                                float avgLengthDeviation = 0,
                                 bool requiresCertainExcitement = false,
                                 int requiredExcitementLevelOrRating = 0,
                                 bool onlySessionGames = false,
@@ -711,6 +711,7 @@ namespace GameTrackerEx01
             if (filterUnreleased && !played && !purchased)
             {
                 recommendable = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).released;
+                
             }
             if (filterReplays && completed)
             {
@@ -734,53 +735,51 @@ namespace GameTrackerEx01
             }
             if (avgLengthMatters)
             {
-                if ((avgGameLength > avgLengthBase && avgGameLength - avgLengthDeviation > avgLengthBase) || (avgGameLength < avgLengthBase && avgGameLength + avgLengthDeviation < avgLengthBase))
+                Console.WriteLine($"{gameName} is length of {avgGameLength}");
+                if ((avgGameLength >= avgLengthBase && (avgGameLength - avgLengthDeviation) > avgLengthBase) || (avgGameLength < avgLengthBase && avgGameLength + avgLengthDeviation < avgLengthBase))
                 {
                     return false;
                 } 
             }
             if (requiresCertainExcitement)
             {
-                if (played)
+                switch (true)
                 {
-                    switch (true)
-                    {
-                        case var _ when purchased && !played:
-                            BackloggedGame backloggedVersion = Menu.FindDetailedGameByID<BackloggedGame>(gameID);
-                            if (backloggedVersion.excitementLevel < requiredExcitementLevelOrRating)
-                            {
-                                return false;
-                            }
-                            break;
-                        case var _ when !purchased && !played:
-                            UnpurchasedGame unpurchasedVersion = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID);
-                            if (unpurchasedVersion.excitementLevel < requiredExcitementLevelOrRating)
-                            {
-                                return false;
-                            }
-                            break;
-                        case var _ when played && !completed && !playing:
-                            DroppedGame droppedVersion = Menu.FindDetailedGameByID<DroppedGame>(gameID);
-                            if (droppedVersion.rating < requiredExcitementLevelOrRating)
-                            {
-                                return false;
-                            }
-                            break;
-                        case var _ when completed:
-                            CompletedGame completedVersion = Menu.FindDetailedGameByID<CompletedGame>(gameID);
-                            if (completedVersion.rating < requiredExcitementLevelOrRating)
-                            {
-                                return false;
-                            }
-                            break;
-                        case var _ when playing:
-                            CurrentGame playingVersion = Menu.FindDetailedGameByID<CurrentGame>(gameID);
-                            if (playingVersion.rating < requiredExcitementLevelOrRating)
-                            {
-                                return false;
-                            }
-                            break;
-                    }
+                    case var _ when purchased && !played:
+                        BackloggedGame backloggedVersion = Menu.FindDetailedGameByID<BackloggedGame>(gameID);
+                        if (backloggedVersion.excitementLevel < requiredExcitementLevelOrRating)
+                        {
+                            return false;
+                        }
+                        break;
+                    case var _ when !purchased && !played:
+                        UnpurchasedGame unpurchasedVersion = Menu.FindDetailedGameByID<UnpurchasedGame>(gameID);
+                        if (unpurchasedVersion.excitementLevel < requiredExcitementLevelOrRating)
+                        {
+                            return false;
+                        }
+                        break;
+                    case var _ when played && !completed && !playing:
+                        DroppedGame droppedVersion = Menu.FindDetailedGameByID<DroppedGame>(gameID);
+                        if (droppedVersion.rating < requiredExcitementLevelOrRating)
+                        {
+                            return false;
+                        }
+                        break;
+                    case var _ when completed:
+                        CompletedGame completedVersion = Menu.FindDetailedGameByID<CompletedGame>(gameID);
+                        if (completedVersion.rating < requiredExcitementLevelOrRating)
+                        {
+                            return false;
+                        }
+                        break;
+                    case var _ when playing:
+                        CurrentGame playingVersion = Menu.FindDetailedGameByID<CurrentGame>(gameID);
+                        if (playingVersion.rating < requiredExcitementLevelOrRating)
+                        {
+                            return false;
+                        }
+                        break;
                 }
             }
             if (filterDeckPlayable && !deckPlayable)

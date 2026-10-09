@@ -13,21 +13,6 @@ namespace GameTrackerEx01
             Menu.GetStats();
             HomePage();
             CSVHandler.UpdateAllFiles();
-            // if (Format.GetClosedAnswer("Would you like to add a new game to the tracker? (y/n)\n"))
-            // {
-            //     VideoGame newGame = new VideoGame();
-            //     newGame.AddGame();
-            //     videoGameList.Add(newGame);
-
-            // }
-            // for (int i = 0; i < Menu.existingVideoGames.Count; i++)
-            // {
-            //     Console.WriteLine(Menu.existingVideoGames[i].DisplayGameDetails());
-            // }
-            // for (int i = 0; i < Menu.existingGenres.Count; i++)
-            // {
-            //     Console.WriteLine(Menu.existingGenres[i].genreName);
-            // }
             
         }
 
@@ -56,7 +41,7 @@ namespace GameTrackerEx01
                     ViewGenres();
                     break;
                 case 5:
-                    //TODO: Display list of recommended games based on previous games stats
+                    GetSpecificGameRecommendation();
                     break;
                 case 0:
                     return;
@@ -136,31 +121,153 @@ namespace GameTrackerEx01
 
         public static void GetSpecificGameRecommendation()
         {
-            // bool[] searchFilters = [false,false,false,false,false,false,false]
+            bool filterWaitingForPrequel = true;
+            bool filterUnreleased = true;
+            bool filterReplays = false;
+            bool filterPlayed = false;
+            bool filterPlaying = false;
+            bool filterDropped = false;
+            bool filterNotPurchased = false;
+            bool filterDeckPlayable = false;
+            bool avgLengthMatters = false;
+            float avgLengthBase = 0;
+            float avgLengthDeviation = 0;
+            bool requiresCertainExcitement = false;
+            int requiredExcitementLevelOrRating = 0;
+            bool onlySessionGames = false;
+            bool ignoreSessionGames = false;
+            int[] filteredGenreIDs = [];
+
+            Console.WriteLine($"Welcome to the targeted game searcher\nLet us help you find out what to play!");
             //Do you want to play a session game?
-
-
-            //Do you want to ignore session games?
-
+            if (Format.GetClosedAnswer($"Would you like to play a session game? (y/n)"))
+            {
+                if (Format.GetClosedAnswer($"Do you want your search to only show session games? (y/n)"))
+                {
+                    onlySessionGames = true;
+                }
+            } else
+            {
+                ignoreSessionGames = true;
+            }
 
             //Do you want a specific genre?
+            if (Format.GetClosedAnswer($"Is there a specific genre you would like to search for? (y/n)"))
+            {
                 //If so, what genres are you keen for?
+                if (Menu.existingGenres.Count > 0)
+                {
+                    Console.WriteLine($"Please select the appropriate genres for your search");
+                    for (int i = 0; i < Menu.existingGenres.Count; i++)
+                    {
+                        Console.WriteLine($"{i+1}. {Menu.existingGenres[i].genreName}");
+                    }
+                    int[] matchingGenres = Format.GetManyMenuResponses(Menu.existingGenres.Count);
+                    for (int i = 0; i < matchingGenres.Length; i++)
+                    {
+                        //Use these genres to filter the games down initially
+                        filteredGenreIDs = filteredGenreIDs.Append(Menu.existingGenres[matchingGenres[i]-1].genreID).ToArray();
+                    }
+                }            
+            }
 
-                //Use these genres to filter the games down initially
-            
-            //How long a game are you looking for - press 0 for "doesn't matter"
-
-            //Do you want to include replays?
-
-            //Do you want to include dropped games?
+            //How long a game are you looking for
+            if (Format.GetClosedAnswer("Are you looking for a game with a specific average length? (y/n)"))
+            {
+                Console.WriteLine($"Please input the average play time you are looking for");
+                avgLengthBase = Format.ConvertStringToFloat(Console.ReadLine(), $"Please input the average play time for your search");
+                avgLengthDeviation = avgLengthBase * 0.3f;
+                avgLengthMatters = true;
+            }
+            //Do you want to include games you have played?
+            if (Format.GetClosedAnswer("Would you like to include games you have previously played? (y/n)"))
+            {
+                //Do you want to include replays?
+                if (!Format.GetClosedAnswer("Do you want to include games you have marked as wanting to replay? (y/n)"))
+                {
+                    filterReplays = true;
+                }
+                //Do you want to include dropped games?
+                if (!Format.GetClosedAnswer("Do you want to include games that you have previously not completed? (y/n)"))
+                {
+                    filterDropped = true;
+                }
+                if (!Format.GetClosedAnswer("Do you want to include games that you are currently playing? (y/n)"))
+                {
+                    filterPlaying = true;
+                }
+            } else
+            {
+                filterPlayed = true;
+            }
 
             //Do you want to include unpurchased games?
+            if (!Format.GetClosedAnswer("Do you want to include released games you do not yet own?"))
+            {
+                filterNotPurchased = true;
+            }            
 
             //Do you want to include games that won't play on the steam deck?
+            if (!Format.GetClosedAnswer("Do you want to include games that cannot run on the Steam deck? (y/n)"))
+            {
+                filterDeckPlayable = true;
+            }
 
             //Do you want a random game, or a game that you have been keen for?
-
+            if (Format.GetClosedAnswer("Do you want to only show games you displayed significant excitement for? (y/n)"))
+            {
+                requiresCertainExcitement = true;
+                requiredExcitementLevelOrRating = 8;
+            }
             
+            (int similarGameID, int numRelGenres)[] similarGames = [];
+            if (filteredGenreIDs.Length > 0)
+            {
+                for (int i = 0; i < filteredGenreIDs.Length; i++)
+                {
+                    //Cycle through each game attached to genre
+                    for (int n = 0; n < Menu.existingGenres[Menu.FindGenre(filteredGenreIDs[i])].attachedGameIDs.Length; n++)
+                    {
+                    
+                        //For each gameID, track how many times it shows up in the genre arrays
+                        if (similarGames.Any(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(filteredGenreIDs[i])].attachedGameIDs[n]))
+                        {
+                            similarGames = similarGames.Select(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(filteredGenreIDs[i])].attachedGameIDs[n] ? (game.similarGameID, game.numRelGenres+1) : game).ToArray();
+                            Console.WriteLine($"Recurring game detected");
+                        } else
+                        {
+                            similarGames = similarGames.Append((Menu.existingGenres[Menu.FindGenre(filteredGenreIDs[i])].attachedGameIDs[n], 1)).ToArray();
+                        }
+                    }
+
+                }
+                //Sort final array by number of related genres
+                similarGames = similarGames.OrderByDescending(game => game.numRelGenres).ToArray();
+            } else
+            {
+                for (int i = 0; i < Menu.existingVideoGames.Count; i++)
+                {
+                    similarGames = similarGames.Append((Menu.existingVideoGames[i].gameID,0)).ToArray();
+                }
+            }
+            (int similarGameID, int numRelGenres)[] similarUnplayedReadyGames = [];
+            //Create list with remaining filters
+            // Console.WriteLine($"filterWatingPrequel = {filterWaitingForPrequel} ;\n filterUnreleased = {filterUnreleased} ;\n filterReplays = {filterReplays} ;\n filterPlayed = {filterPlayed} ;\n filterPlaying = {filterPlaying} ;\n filterDropped = {filterDropped} ;\n filterNotPurchased = {filterNotPurchased} ;\n filterDeckPlayable = {filterDeckPlayable} ;\n avgLengthMatters = {avgLengthMatters} ;\n avgLengthBase = {avgLengthBase} ;\n avgLengthDeviation = {avgLengthDeviation} ;\n requiresCertainExcitement = {requiresCertainExcitement} ;\n requiredExcitementLevelOrRating = {requiredExcitementLevelOrRating} ;\n onlySessionGames = {onlySessionGames} ;\n ignoreSessionGames = {ignoreSessionGames}");
+            similarUnplayedReadyGames = similarGames.Where(game => Menu.FindGameByID(game.similarGameID).ReadyToRecommend(filterWaitingForPrequel, filterUnreleased, filterReplays, filterPlayed, filterPlaying, filterDropped, filterNotPurchased, filterDeckPlayable, avgLengthMatters, avgLengthBase, avgLengthDeviation, requiresCertainExcitement, requiredExcitementLevelOrRating, onlySessionGames, ignoreSessionGames) == true).ToArray();
+
+            if (similarUnplayedReadyGames.Length < 1)
+            {
+                if (Format.GetClosedAnswer($"Unfortunately, there were no games matching your search filters\nWould you like to try again? (y/n)"))
+                {
+                    GetSpecificGameRecommendation();
+                }
+                return;
+            }
+            Console.WriteLine($"\n\nPlease find the results for your search:\n\n");
+            for (int i = 0; i < similarUnplayedReadyGames.Length; i++)
+            {
+                Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarUnplayedReadyGames[i].similarGameID).DisplayGameDetails()}");
+            } 
         }
 
         
