@@ -580,7 +580,7 @@ namespace GameTrackerEx01
             {
                 Console.WriteLine($"{similarGames[i].similarGameID}, {similarGames[i].numRelGenres}");
             }
-            (int similarGameID, int numRelGenres)[] similarUnplayedReadyGames = [];
+            (int similarGameID, int numRelGenres)[] similarFilteredGames = [];
 
             //Create list without any games played, or awaiting previous completion
             Console.WriteLine($"\n\nGames similar to {gameName}:\n\n");
@@ -592,24 +592,13 @@ namespace GameTrackerEx01
                 }
             }
 
-            similarUnplayedReadyGames = similarGames.Where(game => Menu.FindGameByID(game.similarGameID).ReadyToRecommend(true, false, false, true) == true).ToArray();
+            similarFilteredGames = similarGames.Where(game => Menu.FindGameByID(game.similarGameID).ReadyToRecommend(Menu.mainFiles.filterWaitingForPrequelSetting, Menu.mainFiles.filterUnreleasedSetting, Menu.mainFiles.filterReplaysSetting, Menu.mainFiles.filterPlayedSetting, Menu.mainFiles.filterPlayingSetting, Menu.mainFiles.filterDroppedSetting, Menu.mainFiles.filterNotPurchasedSetting, Menu.mainFiles.CalculateDeckPlayableFilter(deckPlayable), Menu.mainFiles.CalculateAvgLengthFilter(sessionGame), Menu.mainFiles.CalculateAvgLengthBase(avgGameLength), Menu.mainFiles.CalculateAvgLengthDeviation(avgGameLength), Menu.mainFiles.requiresCertainExcitementSetting, Menu.mainFiles.requiredExcitementLevelOrRatingSetting, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).onlySession, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).ignoreSession) == true).ToArray();
 
-            Console.WriteLine($"Unplayed and ready to play games similar to {gameName}:");
-            for (int i = 0; i < similarUnplayedReadyGames.Length; i++)
+            Console.WriteLine($"Filtered games similar to {gameName}:");
+            for (int i = 0; i < similarFilteredGames.Length; i++)
             {
-                Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarUnplayedReadyGames[i].similarGameID).DisplayGameDetails()}");
+                Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarFilteredGames[i].similarGameID).DisplayGameDetails()}");
             }
-            //If any of the games have been completed, and retry is not desired, remove entry and find next suitable result
-
-            //If selected as so, remove all results from same franchise, and find next suitable results
-
-            //If selected as such, prioritise similar length games
-
-            //If selected as such, remove unpurchased games, and replace with next suitable results
-
-            //If requested as such, remove all played games from suggestions
-
-
         }
         public string DisplayGameDetails()
         {

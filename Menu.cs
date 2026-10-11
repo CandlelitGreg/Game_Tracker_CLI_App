@@ -23,26 +23,13 @@ namespace GameTrackerEx01
         public static List<UnpurchasedGame> existingUnpurchasedGames = [];
         public static List<BackloggedGame> existingBackloggedGames = [];
 
-        public class settingsInfo {
-            public int nextGameID {get; set;}
-            public int nextFranchiseID {get; set;}
-            public int nextGenreID {get;set;}
-            public string genreFile {get; set;}
-            public string franchiseFile {get; set;}
-            public string currentGameFile {get; set;}
-            public string completedGameFile {get; set;}
-            public string droppedGameFile {get; set;}
-            public string unpurchasedGameFile {get; set;}
-            public string backloggedGameFile {get; set;}
-        }
+        public static List<SettingsInfo> backupFiles = [];
 
-        public static List<settingsInfo> backupFiles = [];
+        public static SettingsInfo mainFiles;
 
-        public static settingsInfo mainFiles;
-        
         public static void GetStats()
         {
-            backupFiles = DownloadInfo<settingsInfo>(settingsPath);
+            backupFiles = DownloadInfo<SettingsInfo>(settingsPath);
             mainFiles = backupFiles[backupFiles.Count-1];
             existingGenres = DownloadInfo<Genre>(mainFiles.genreFile);
             existingFranchises = DownloadInfo<Franchise>(mainFiles.franchiseFile);
@@ -103,6 +90,9 @@ namespace GameTrackerEx01
                 case var _ when typeof(T) == typeof(Franchise):
                     csv.Context.RegisterClassMap<RetrieveFranchiseMap>();
                     break;
+                case var _ when typeof(T) == typeof(SettingsInfo):
+                    csv.Context.RegisterClassMap<RetrieveSettingsMap>();
+                    break;
             }
             return csv.GetRecords<T>().ToList();
         }
@@ -120,14 +110,14 @@ namespace GameTrackerEx01
         {
             mainFiles.nextGameID++;
             backupFiles[backupFiles.Count - 1] = mainFiles;
-            CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGameID - 1;
         }
         public static int GetAndUpdateNextGenreID()
         {
             mainFiles.nextGenreID++;
             backupFiles[backupFiles.Count - 1] = mainFiles;
-            CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGenreID - 1;
         }
         public static void AddNewGenre()
@@ -209,7 +199,7 @@ namespace GameTrackerEx01
             newFranchise.franchiseID = mainFiles.nextFranchiseID;
             mainFiles.nextFranchiseID++;
             backupFiles[backupFiles.Count - 1] = mainFiles;
-            CSVHandler.UpdateInfoFile<settingsInfo>(backupFiles, settingsPath);
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             
 
 

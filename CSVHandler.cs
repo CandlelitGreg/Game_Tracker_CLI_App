@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Xml.Serialization;
 
 namespace GameTrackerEx01
 {
@@ -17,6 +18,7 @@ namespace GameTrackerEx01
             UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, Menu.mainFiles.droppedGameFile);
             UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, Menu.mainFiles.unpurchasedGameFile);
             UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, Menu.mainFiles.backloggedGameFile);
+            UpdateInfoFile<SettingsInfo>(Menu.backupFiles, Menu.settingsPath);
         }
 
         public static void UpdateInfoFile<T>(List<T> infoData, string filepath)
@@ -35,9 +37,6 @@ namespace GameTrackerEx01
                 case List<CompletedGame>:
                     csv.Context.RegisterClassMap<CompletedGameMap>();
                     break;
-                // case List<PlayedGame>:
-                //     csv.Context.RegisterClassMap<PlayedGameMap>();
-                //     break;
                 case List<UnpurchasedGame>:
                     csv.Context.RegisterClassMap<UnpurchasedGameMap>();
                     break;
@@ -50,16 +49,16 @@ namespace GameTrackerEx01
                 case List<Franchise>:
                     csv.Context.RegisterClassMap<FranchiseMap>();
                     break;
-                // case List<VideoGame>:
-                //     csv.Context.RegisterClassMap<VideoGameMap>();
-                //     break;
+                case List<SettingsInfo>:
+                    csv.Context.RegisterClassMap<SettingsMap>();
+                    break;
             }
             csv.WriteRecords(infoData);
         }
 
         public static void CreateBackups()
         {
-            Menu.settingsInfo newSettingsInfo = new Menu.settingsInfo();
+            SettingsInfo newSettingsInfo = new SettingsInfo();
             newSettingsInfo.nextGameID = Menu.mainFiles.nextGameID;
             newSettingsInfo.nextFranchiseID = Menu.mainFiles.nextFranchiseID;
             newSettingsInfo.nextGenreID = Menu.mainFiles.nextGenreID;
@@ -83,12 +82,12 @@ namespace GameTrackerEx01
             Menu.backupFiles.Add(newSettingsInfo);
             Menu.mainFiles = newSettingsInfo;
 
-            UpdateInfoFile<Menu.settingsInfo>(Menu.backupFiles, Menu.settingsPath);
+            UpdateInfoFile<SettingsInfo>(Menu.backupFiles, Menu.settingsPath);
         }
 
         public static void CreateRefresh()
         {
-            Menu.settingsInfo newSettingsInfo = new Menu.settingsInfo();
+            SettingsInfo newSettingsInfo = new SettingsInfo();
             newSettingsInfo.nextGameID = 0;//Menu.mainFiles.nextGameID;
             newSettingsInfo.nextFranchiseID = 0;//Menu.mainFiles.nextFranchiseID;
             newSettingsInfo.nextGenreID = 0;//Menu.mainFiles.nextGenreID;
@@ -112,7 +111,7 @@ namespace GameTrackerEx01
             Menu.backupFiles.Add(newSettingsInfo);
             Menu.mainFiles = newSettingsInfo;
 
-            UpdateInfoFile<Menu.settingsInfo>(Menu.backupFiles, Menu.settingsPath);
+            UpdateInfoFile<SettingsInfo>(Menu.backupFiles, Menu.settingsPath);
         }
 
         

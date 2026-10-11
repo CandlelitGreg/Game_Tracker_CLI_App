@@ -24,8 +24,9 @@ namespace GameTrackerEx01
             Console.WriteLine("3. View franchises in tracker");
             Console.WriteLine("4. View genres in tracker");
             Console.WriteLine("5. Get game recommendation");
+            Console.WriteLine("6. Change Settings");
             Console.WriteLine("0. Exit");
-            int userInput = Format.GetSingleResponse(5, "What action would you like to do?");
+            int userInput = Format.GetSingleResponse(6, "What action would you like to do?");
             switch (userInput)
             {
                 case 1:
@@ -42,6 +43,9 @@ namespace GameTrackerEx01
                     break;
                 case 5:
                     GetSpecificGameRecommendation();
+                    break;
+                case 6:
+                    Menu.mainFiles.OpenSettings();
                     break;
                 case 0:
                     return;
