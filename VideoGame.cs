@@ -785,6 +785,23 @@ namespace GameTrackerEx01
             }
             return recommendable;
         }
+        public int RetrieveGameRatingOrExcitement()
+        {
+            switch (true)
+            {
+                case var _ when completed:
+                    return Menu.FindDetailedGameByID<CompletedGame>(gameID).rating;
+                case var _ when playing:
+                    return Menu.FindDetailedGameByID<CurrentGame>(gameID).rating;
+                case var _ when !completed && !playing && played:
+                    return Menu.FindDetailedGameByID<DroppedGame>(gameID).rating;
+                case var _ when !purchased:
+                    return Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).excitementLevel;
+                case var _ when !played && purchased:
+                    return Menu.FindDetailedGameByID<BackloggedGame>(gameID).excitementLevel;
+            }
+            return 0;
+        }
         public void UpdateAllGenreStats()
         {
             for (int i = 0; i < gameGenreIDs.Length; i++)

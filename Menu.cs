@@ -44,24 +44,24 @@ namespace GameTrackerEx01
             existingReplays.AddRange(allGames.replays);
             SortGameLists();
             RecalculateAllGenreStats();
-            Console.WriteLine($"There are {existingVideoGames.Count} total games in the tracker\n");
-            for (int i = 0; i < existingVideoGames.Count; i++)
-            {
-                Console.WriteLine("\n" +existingVideoGames[i].DisplayGameDetails() + "\n");
-            }
+            // Console.WriteLine($"There are {existingVideoGames.Count} total games in the tracker\n");
+            // for (int i = 0; i < existingVideoGames.Count; i++)
+            // {
+            //     Console.WriteLine("\n" +existingVideoGames[i].DisplayGameDetails() + "\n");
+            // }
 
-            Console.WriteLine($"\nThere are {existingFranchises.Count} total franchises in the tracker\n");
-            for (int i = 0; i < existingFranchises.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {existingFranchises[i].franchiseName}");
-            }
+            // Console.WriteLine($"\nThere are {existingFranchises.Count} total franchises in the tracker\n");
+            // for (int i = 0; i < existingFranchises.Count; i++)
+            // {
+            //     Console.WriteLine($"{i + 1}. {existingFranchises[i].franchiseName}");
+            // }
 
-            Console.WriteLine($"\nThere are {existingGenres.Count} total genres in the tracker\n");
-            for (int i = 0; i < existingGenres.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}.");
-                existingGenres[i].ViewGenreAverages();
-            }
+            // Console.WriteLine($"\nThere are {existingGenres.Count} total genres in the tracker\n");
+            // for (int i = 0; i < existingGenres.Count; i++)
+            // {
+            //     Console.WriteLine($"{i + 1}.");
+            //     existingGenres[i].ViewGenreAverages();
+            // }
         }
         public static List<T> DownloadInfo<T>(string filepath)
         {

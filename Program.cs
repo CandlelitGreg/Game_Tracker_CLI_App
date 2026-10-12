@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 using CsvHelper;
 
 namespace GameTrackerEx01
@@ -42,7 +44,7 @@ namespace GameTrackerEx01
                     ViewGenres();
                     break;
                 case 5:
-                    GetSpecificGameRecommendation();
+                    OpenGameRecommender();
                     break;
                 case 6:
                     Menu.mainFiles.OpenSettings();
@@ -120,7 +122,79 @@ namespace GameTrackerEx01
 
         public static void GetGeneralGameRecommendation()
         {
+            //Get 2 from each top 3 genres, and 2 from each of 3 most recently played games
 
+            List<Genre> genreList = new List<Genre>(Menu.existingGenres);
+            genreList.Sort((x,y) => x.avgGenreRating.CompareTo(y.avgGenreRating));
+            Genre mostRatedGenre = genreList[genreList.Count - 1];
+            genreList.Sort((x,y) => x.totalHoursPlayed.CompareTo(y.totalHoursPlayed));
+            Genre mostPlayedGenre = genreList[genreList.Count - 1];
+            genreList.Sort((x,y) => x.avgGenreCompletion.CompareTo(y.avgGenreCompletion));
+            Genre mostCompletedGenre = genreList[genreList.Count - 1];
+            List<Genre> recommendedGenres = [mostRatedGenre, mostPlayedGenre, mostCompletedGenre];
+
+            //Get top rated/excited games from each genre that are wanting to replay, ready to play
+            List<VideoGame> recommendedGames = [];
+            
+            for (int n = 0; n < recommendedGenres.Count; n++)
+            {
+                int topRating = 0;
+                List<VideoGame> bestGamesInGenre = [];
+                for (int i = 0; i < recommendedGenres[n].attachedGameIDs.Length; i++)
+                {
+                    VideoGame currentGame = Menu.FindGameByID(recommendedGenres[n].attachedGameIDs[i]);
+                    if (currentGame.ReadyToRecommend(true, true, false, false, true, true) && !(currentGame.completed && !Menu.FindDetailedGameByID<CompletedGame>(currentGame.gameID).wantToPlayAgain))
+                    {
+                        if (currentGame.RetrieveGameRatingOrExcitement() > topRating)
+                        {
+                            topRating = currentGame.RetrieveGameRatingOrExcitement();
+                            bestGamesInGenre = [currentGame];
+                        } 
+                        else if (currentGame.RetrieveGameRatingOrExcitement() == topRating)
+                        {
+                            bestGamesInGenre.Add(currentGame);
+                        }
+                        
+                    }
+                }
+                for (int i = 0; i < bestGamesInGenre.Count; i++)
+                {
+                    recommendedGames.Add(bestGamesInGenre[i]);
+                }
+            }
+
+            List<VideoGame> displayedGames = [];
+            if (recommendedGames.Count > 10)
+            {
+                Random random = new Random();
+                bool readyToDisplay = false;
+                while (displayedGames.Count < 10 && !readyToDisplay)
+                {
+                    int randomIndex = random.Next(0,recommendedGames.Count);
+                    if (!displayedGames.Contains(recommendedGames[randomIndex]))
+                    {
+                        displayedGames.Add(recommendedGames[randomIndex]);
+                        recommendedGames.RemoveAll(game => game.gameID == recommendedGames[randomIndex].gameID);
+                    }
+                    if (recommendedGames.Count < 1)
+                    {
+                        readyToDisplay = true;
+                    }
+                }
+            } else
+            {
+                for (int i = 0; i < recommendedGames.Count; i++)
+                {
+                    if (!displayedGames.Contains(recommendedGames[i]))
+                    {
+                        displayedGames.Add(recommendedGames[i]);
+                    }
+                }
+            }
+            for (int i = 0; i < displayedGames.Count; i++)
+            {
+                Console.WriteLine($"\n{i+1}.\n{displayedGames[i].DisplayGameDetails()}");
+            }
         }
 
         public static void GetSpecificGameRecommendation()
@@ -274,7 +348,26 @@ namespace GameTrackerEx01
             } 
         }
 
-        
+        public static void OpenGameRecommender()
+        {
+            Console.WriteLine("\n\nWelcome to your Video Game Recommender!\nPlease select an option from the menu below:\n");
+            Console.WriteLine("1. Get automatic recommendation");
+            Console.WriteLine("2. Get curated recommendation");
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(2, "What action would you like to do?");
+            switch (userInput)
+            {
+                case 1:
+                    GetGeneralGameRecommendation();
+                    break;
+                case 2:
+                    GetSpecificGameRecommendation();
+                    break;
+                case 0:
+                    return;
+            }
+            OpenGameRecommender();
+        }
 
 
 
