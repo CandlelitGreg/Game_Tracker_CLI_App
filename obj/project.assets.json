@@ -56,9 +56,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/Tests_and_Experiments.csproj",
-      "projectName": "Tests_and_Experiments",
-      "projectPath": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/Tests_and_Experiments.csproj",
+      "projectUniqueName": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/Game_Tracker_CLI_App.csproj",
+      "projectName": "Game_Tracker_CLI_App",
+      "projectPath": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/Game_Tracker_CLI_App.csproj",
       "packagesPath": "/Users/gregwilkinson/.nuget/packages/",
       "outputPath": "/Users/gregwilkinson/Portfolio_Projects/Game_Tracker_CLI_App/obj/",
       "projectStyle": "PackageReference",

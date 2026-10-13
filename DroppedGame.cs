@@ -1,3 +1,4 @@
+using System.Buffers;
 using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
@@ -125,17 +126,20 @@ namespace GameTrackerEx01
 
         public void LogRetry()
         {
-            //Create current game object
-
-
-            //Add dropped details as initial log entry in current game object
-
-
-            //Get current game details
-
-
-            //remove this object
-            
+            CurrentGame currentVersion = new CurrentGame();
+            currentVersion.GrabPlayedGameInfo(this);
+            currentVersion.GetCurrentGameInfo();
+            Menu.existingDroppedGames.Remove(this);
+            Menu.SortGameLists();
+            if (Format.GetClosedAnswer($"Would you like to make a log entry regarding retrying {gameName}? (y/n)"))
+            {
+                currentVersion.AddLog();
+            }
+            currentVersion.playing = true;
+            currentVersion.played = true;
+            currentVersion.previouslyDropped = true;
+            currentVersion.completed = false;
+            currentVersion.previouslyDroppedReason = reasonDropped;
         }
         public void AlterDropDate()
         {
@@ -210,7 +214,6 @@ namespace GameTrackerEx01
                     EditSequelStatus();
                     break;
                 case 5:
-                    //vvvv TODO: Change log storage to log IDs - make log class object - make logs get saved in seperate file that gets called from by id vvvv
                     EditLogs();
                     break;
                 case 6:

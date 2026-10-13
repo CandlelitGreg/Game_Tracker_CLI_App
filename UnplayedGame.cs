@@ -42,14 +42,6 @@ namespace GameTrackerEx01
                 excitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"How would you rate your current excitement for {gameName} on a scale from 1-10? (1: Horrible, 10: Amazing)");
             }
 
-            // //Get sequel status
-            // if (franchiseID != -1 && Format.GetClosedAnswer($"Is {gameName} a sequel? (y/n)"))
-            // {
-            //     sequel = true;
-            //     previousEntryID = GetPrequelStatus();
-            //     if (previousEntryID == -1) sequel = false;
-            // }
-
             //Get purchased status
             if (Format.GetClosedAnswer($"Do you already own {gameName}? (y/n)"))
             {
@@ -86,12 +78,6 @@ namespace GameTrackerEx01
             {
                 for (int i = 0; i < gameFranchise.franchiseEntryIDs.Length; i++)
                 {
-                    // Console.WriteLine($"franchiseEntryIDs should have {gameFranchise.franchiseEntryIDs.Length} entries, and the current index is {i} and the current gameID is {gameFranchise.franchiseEntryIDs[i]}");
-                    // if (Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]) == null)
-                    // {
-                    //     Console.WriteLine($"Game with ID {gameFranchise.franchiseEntryIDs[i]} could not be found in our records.");
-                    // }
-                    // Console.WriteLine($"Comparing {previousEntry.ToLower()} to {Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower()}");
                     string nextIDName = Menu.FindGameByID(gameFranchise.franchiseEntryIDs[i]).gameName.ToLower();
                     if (previousEntry.ToLower() == nextIDName)
                     {
@@ -143,11 +129,6 @@ namespace GameTrackerEx01
             {
                 return true;
             }
-        }
-
-        public void EditPurchased()
-        {
-
         }
 
         public void EditSequelStatus()
@@ -242,21 +223,18 @@ namespace GameTrackerEx01
 
         public void PlayGame()
         {
-            //Create Playedgame object
-
-            //Transfer VG info
-
-            //Get Played Game info
-
-            //Create currentgame object
-
-            //transfer PlayedGame info
-
-            //Set FirstPlay date
-
-            //get currentgame info
-
-            //remove this object
+            PlayedGame playedVersion = new PlayedGame();
+            playedVersion.initialExcitementLevel = excitementLevel;
+            playedVersion.played = true;
+            playedVersion.GrabGameInfo(this);
+            playedVersion.StartPlaythrough();
+            playedVersion.purchased = true;
+            if (purchased)
+            {
+                Menu.existingBackloggedGames.RemoveAll(game => game.gameID == gameID);
+                return;
+            }
+            Menu.existingUnpurchasedGames.RemoveAll(game => game.gameID == gameID);
         }
 
         public string DisplayUnplayedGameInfo()

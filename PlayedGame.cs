@@ -16,37 +16,38 @@ namespace GameTrackerEx01
         public string mainPlayDevice {get; set;}
         public bool modded {get; set;}
 
-        public void GetPlayInfo()
+        public void GetPlayInfo(string completedQuestion = $"Have you completed ", string currentQuestion = "Are you currently playing ")
         {
             //Get current playtime
             Console.WriteLine($"Please input the approximate number of hours you have spent with {gameName}");
             hoursPlayed = Format.ConvertStringToFloat(Console.ReadLine(), $"Please input the approximate play time you have spent with {gameName}");
 
             //Get current rating
-            Console.WriteLine($"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            while (rating > 10 || rating < 1)
-            {
-                Console.WriteLine($"{rating} is outside of the 1-10 range. Please select a rating within 1 and 10");
-                rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            }
+            // Console.WriteLine($"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
+            // rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
+            // while (rating > 10 || rating < 1)
+            // {
+            //     Console.WriteLine($"{rating} is outside of the 1-10 range. Please select a rating within 1 and 10");
+            //     rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
+            // }
+            EditRating();
 
             //Get initial excitement level
-            Console.WriteLine($"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            while (initialExcitementLevel > 10 || initialExcitementLevel < 1)
-            {
-                Console.WriteLine($"{initialExcitementLevel} is outside of the 1-10 range. Please select a rating within 1 and 10");
-                initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            }
+            // Console.WriteLine($"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
+            // initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
+            // while (initialExcitementLevel > 10 || initialExcitementLevel < 1)
+            // {
+            //     Console.WriteLine($"{initialExcitementLevel} is outside of the 1-10 range. Please select a rating within 1 and 10");
+            //     initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
+            // }
+            EditInitialExcitement();
 
 
             //Get initial impressions
-            Console.WriteLine($"What were your inital impressions and thoughts after your first play session of {gameName}?");
-            initialImpressions = Format.ReplaceCommasInString(Console.ReadLine());
+            AddInitialImpressions();
             
             //Check completed status
-            completed = Format.GetClosedAnswer($"Have you completed {gameName}? (y/n)");
+            completed = Format.GetClosedAnswer($"{completedQuestion}{gameName}? (y/n)");
             if (completed)
             {
                 CompletedGame completedVersion = new CompletedGame();
@@ -59,7 +60,7 @@ namespace GameTrackerEx01
                     completedVersion.nextEntryID = nextEntryID;
                     completedVersion.SaveGameInfo();
                 }
-            } else if (Format.GetClosedAnswer($"Are you currently playing {gameName}? (y/n)"))
+            } else if (Format.GetClosedAnswer($"{currentQuestion}{gameName}? (y/n)"))
             {
                 playing = true;
                 CurrentGame currentVersion = new CurrentGame();
@@ -84,13 +85,25 @@ namespace GameTrackerEx01
                     droppedVersion.SaveGameInfo();
                 }
             }
-
-            
-
-
-            
-
-
+        }
+        public void StartPlaythrough()
+        {   
+            played = true;
+            purchased = true;
+            GetPlayInfo("Did you complete ", "Are you going to keep playing ");
+            if (Format.GetClosedAnswer($"Do you want to add a log to your first play session of {gameName}? (y/n)"))
+            {
+                AddLog();
+                Menu.FindLog(Menu.mainFiles.nextLogID - 1).startedGame = true;
+                if (completed)
+                {
+                    Menu.FindLog(Menu.mainFiles.nextLogID - 1).finishedGame = true;
+                }
+                else if (!playing && !completed)
+                {
+                    Menu.FindLog(Menu.mainFiles.nextLogID - 1).droppedGame = true;
+                }
+            }
         }
         //TODO: Fix bug where newly created sequel is not attached to original game ?? Fixed ?? (I believe so...)
         public int GetSequelStatus()
@@ -143,12 +156,8 @@ namespace GameTrackerEx01
 
         public void AddInitialImpressions()
         {
-
-        }
-
-        public void AddInitialExcitement(int initialExcitement)
-        {
-            initialExcitementLevel = initialExcitement;
+            Console.WriteLine($"What were your inital impressions and thoughts after your first play session of {gameName}?");
+            initialImpressions = Format.ReplaceCommasInString(Console.ReadLine());
         }
 
         public void AddRating()
@@ -178,23 +187,41 @@ namespace GameTrackerEx01
 
         public void EditRating()
         {
-            Console.WriteLine($"Your current rating on file for {gameName} is {rating}\nWhat is your updated rating?");
-            int newRating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating for {gameName}?");
-            if (Format.GetClosedAnswer($"Are you sure you want to update your rating of {gameName} from {rating} to {newRating}? (y/n)"))
+            if (rating != 0)
             {
-                rating = newRating;
+                Console.WriteLine($"Your current rating on file for {gameName} is {rating}\nWhat is your updated rating?");
             }
+            int newRating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating for {gameName} from 1-10? (1: Horrible, 10: Amazing)?");
+            while (newRating > 10 || newRating < 1)
+            {
+                Console.WriteLine($"{newRating} is outside of the 1-10 range. Please select a rating within 1 and 10");
+                newRating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
+            }
+            if (rating != 0 && !Format.GetClosedAnswer($"Are you sure you want to update your rating of {gameName} from {rating} to {newRating}? (y/n)"))
+            {
+                return;
+            }
+            rating = newRating;
             SaveGameUpdates();
         }
 
         public void EditInitialExcitement()
         {
-            Console.WriteLine($"Your initial excitement for {gameName} is currently {initialExcitementLevel}\nWhat would you like to change your initial excitement rating to?");
-            int newExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level for {gameName}?");
-            if (Format.GetClosedAnswer($"Are you sure you want to update your initial excitement level of {gameName} from {initialExcitementLevel} to {newExcitementLevel}? (y/n)\nThis statistic is intended to be representative of your very first thoughts after the first hour/s."))
+            if (initialExcitementLevel != 0)
             {
-                initialExcitementLevel = newExcitementLevel;
+                Console.WriteLine($"Your initial excitement for {gameName} is currently {initialExcitementLevel}\nWhat would you like to change your initial excitement rating to?");
             }
+            int newExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
+            while (newExcitementLevel > 10 || newExcitementLevel < 1)
+            {
+                Console.WriteLine($"{newExcitementLevel} is outside of the 1-10 range. Please select a rating within 1 and 10");
+                newExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
+            }
+            if (initialExcitementLevel != 0 && !Format.GetClosedAnswer($"Are you sure you want to update your initial excitement level of {gameName} from {initialExcitementLevel} to {newExcitementLevel}? (y/n)\nThis statistic is intended to be representative of your very first thoughts after the first hour/s."))
+            {
+                return;
+            }
+            initialExcitementLevel = newExcitementLevel;
             SaveGameUpdates();
         }
 
@@ -256,7 +283,27 @@ namespace GameTrackerEx01
 
         public void EditLogs()
         {
-            Console.WriteLine("The developer is yet to add the intended logs feature");
+            Console.WriteLine("Below are all of your log entries\n");
+            string logDisplay = "";
+            for (int i = 0; i < logMessageIDs.Length; i++)
+            {
+                logDisplay += $"Log Message {i + 1}:\n";
+                LogMessage currentLog = Menu.FindLog(logMessageIDs[i]);
+                logDisplay += $"        Log Date:             {currentLog.logDate}\n";
+                logDisplay += $"        Log Play Duration:    {currentLog.playDuration}\n";
+                logDisplay += $"        Log Entry:            {currentLog.ReadLogPreview()}\n";
+            }
+            Console.WriteLine("Please enter the number for the log entry you would like to edit, or press 0 to go back");
+            int userInput = Format.GetSingleResponse(logMessageIDs.Length, $"What do you want to change about {gameName}'s sequel?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindLog(logMessageIDs[userInput - 1]).EditLogInputs();
+                    break;
+            }
+            EditLogs();
         }
 
         public void ChangePlayDevice()
@@ -283,7 +330,50 @@ namespace GameTrackerEx01
             SaveGameUpdates();
         }
 
-       
+        public void CompleteGame<T>(T previousVersion) where T : PlayedGame
+        {
+            CompletedGame completeVersion = new CompletedGame();
+            completeVersion.GrabPlayedGameInfo(previousVersion);
+            completeVersion.GetCompletedGameInfo();
+            switch (true)
+            {
+                case var _ when typeof(T) == typeof(CurrentGame):
+                    Menu.existingCurrentGames.RemoveAll(game => game.gameID == gameID);
+                    break;
+                case var _ when typeof(T) == typeof(DroppedGame):
+                    Menu.existingDroppedGames.RemoveAll(game => game.gameID == gameID);
+                    break;
+            }
+            Menu.SortGameLists();
+            completeVersion.playing = false;
+            completeVersion.played = true;
+            completeVersion.completed = true;
+            if (Format.GetClosedAnswer($"Would you like to make a log entry regarding completing {gameName}? (y/n)"))
+            {
+                completeVersion.AddLog();
+                Menu.FindLog(Menu.mainFiles.nextLogID - 1).finishedGame = true;
+            }
+        }
+
+        public void DropGame<T>(T previousVersion) where T : PlayedGame
+        {
+            DroppedGame droppedVersion = new DroppedGame();
+            droppedVersion.GrabPlayedGameInfo(previousVersion);
+            droppedVersion.GetDroppedGameInfo();
+            switch (true)
+            {
+                case var _ when typeof(T) == typeof(CurrentGame):
+                    Menu.existingCurrentGames.RemoveAll(game => game.gameID == gameID);
+                    break;
+            }
+            if (Format.GetClosedAnswer($"Would you like to make a log entry regarding dropping {gameName}? (y/n)"))
+            {
+                droppedVersion.AddLog();
+                Menu.FindLog(Menu.mainFiles.nextLogID - 1).droppedGame = true;
+            }
+            droppedVersion.playing = false;
+            droppedVersion.played = true;
+        }
 
 
 
@@ -295,25 +385,6 @@ namespace GameTrackerEx01
                 abreviatedImpressions = $"{abreviatedImpressions.Substring(0,45)}...";
             }
             return abreviatedImpressions;
-        }
-        public string ReadInitialImpressions()
-        {
-            return Format.ReturnCommasToString(initialImpressions);
-        }
-
-        public float ReadHoursPlayed()
-        {
-            return hoursPlayed;
-        }
-
-        public int ReadInitialExcitement()
-        {
-            return initialExcitementLevel;
-        }
-
-        public int ReadRating()
-        {
-            return rating;
         }
 
         public string DisplayPlayedInfo()
@@ -349,12 +420,6 @@ namespace GameTrackerEx01
             }
             return playedGameInfo;
         }
-
-        public int ReadIntialExcitment()
-        {
-            return initialExcitementLevel;
-        }
-
         public void GrabPlayedGameInfo(PlayedGame parentGame)
         {
             GrabGameInfo(parentGame);

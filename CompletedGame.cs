@@ -25,7 +25,6 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            // Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
             Map(m => m.logMessageIDs).Convert(args => string.Join(";", args.Value.logMessageIDs));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -33,6 +32,7 @@ namespace GameTrackerEx01
             Map(m => m.completionDate);
             Map(m => m.review);
             Map(m => m.wantToPlayAgain);
+            Map(m => m.completionistComplete);
             Map(m => m.replaying);
             Map(m => m.replayID).Convert(args => string.Join(";", args.Value.replayID));
         }
@@ -60,7 +60,6 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            // Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
             Map(m => m.logMessageIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessageIDs")) ? Array.Empty<int>() : args.Row.GetField("logMessageIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -68,6 +67,7 @@ namespace GameTrackerEx01
             Map(m => m.completionDate);
             Map(m => m.review);
             Map(m => m.wantToPlayAgain);
+            // Map(m => m.completionistComplete);
             Map(m => m.replaying);
             Map(m => m.replayID).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("replayID")) ? Array.Empty<int>() : args.Row.GetField("replayID")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
         }
@@ -80,6 +80,7 @@ namespace GameTrackerEx01
         public DateOnly completionDate {get; set;}
         public string review {get; set;}
         public bool wantToPlayAgain {get; set;}
+        public bool completionistComplete {get; set;} = false;
         public bool replaying {get; set;}
         public int[] replayID {get; set;} = []; //Treat replay as a second gameID but hidden to user, only used to access replay specific information
         
@@ -260,7 +261,6 @@ namespace GameTrackerEx01
                     EditSequelStatus();
                     break;
                 case 5:
-                    //vvvv TODO: Change log storage to log IDs - make log class object - make logs get saved in seperate file that gets called from by id vvvv
                     EditLogs();
                     break;
                 case 6:

@@ -116,13 +116,11 @@ namespace GameTrackerEx01
 
         public void PurchaseGame()
         {
-            //Create BackloggedGame object
-
-            //Transfer UnplayedData
-
-            //Get Backlogged Data
-
-            //Remove this object
+            BackloggedGame purchasedVersion = new BackloggedGame();
+            purchasedVersion.GrabUnplayedInfo(this);
+            purchasedVersion.GetBackloggedGameInfo();
+            purchasedVersion.purchased = true;
+            Menu.existingUnpurchasedGames.RemoveAll(game => game.gameID == gameID);
         }
 
         public void CheckIfReleased()
@@ -215,8 +213,8 @@ namespace GameTrackerEx01
         public string DisplayUnpurchasedGameInfo()
         {
             string unpurchasedGameInfo = DisplayUnplayedGameInfo() +
-                                       $"Full Price:               {fullPrice}\n" +
-                                       $"Lowest Sale Price:        {lowestSalePrice}\n" +
+                                       $"Full Price:               ${fullPrice}\n" +
+                                       $"Lowest Sale Price:        ${lowestSalePrice}\n" +
                                        $"Released:                 {(released ? "Yes" : "No")}\n";
             if (!released)
             {

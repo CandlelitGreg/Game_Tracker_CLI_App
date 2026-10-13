@@ -77,6 +77,7 @@ namespace GameTrackerEx01
         public bool replay {get; set;}
         public int originalPlaythroughID {get; set;}
         public bool previouslyDropped {get; set;}
+        public string previouslyDroppedReason {get; set;}
 
         public void GetCurrentGameInfo()
         {
@@ -176,30 +177,29 @@ namespace GameTrackerEx01
             else if (!previouslyDropped && Format.GetClosedAnswer($"Are you sure you would like to add the previously dropped tag from {gameName} in your files? (y/n)"))
             {
                 previouslyDropped = true;
+                EditPreviouslyDroppedReason();
             }
             SaveGameUpdates();
         }
 
-        public void CreateLogEntry()
+        public void EditPreviouslyDroppedReason()
         {
-            //Add log message
-
-            //Update playtime
-
-            //Update last played date
+            Console.WriteLine($"Why did you originally drop {gameName}?");
+            previouslyDroppedReason = Format.ReplaceCommasInString(Console.ReadLine());
         }
 
-        public void CompleteGame()
+        public string ReadWhyDroppedPreview()
         {
-            //Create CompletedGame object
-
-            //Transfer currentGame details
-
-            //Set completion date
-
-            //Get Completed game info
-
-            //remove this object
+            string returnPreview = Format.ReturnCommasToString(previouslyDroppedReason);
+            if (returnPreview.Length > 45)
+            {
+                returnPreview = $"{returnPreview.Substring(0,45)}...";
+            }
+            return returnPreview;
+        }
+        public string ReadWhyDropped()
+        {
+            return Format.ReturnCommasToString(previouslyDroppedReason);
         }
 
         public void EditChildDetails()
@@ -233,7 +233,6 @@ namespace GameTrackerEx01
                     EditSequelStatus();
                     break;
                 case 5:
-                    //vvvv TODO: Change log storage to log IDs - make log class object - make logs get saved in seperate file that gets called from by id vvvv
                     EditLogs();
                     break;
                 case 6:
@@ -261,6 +260,11 @@ namespace GameTrackerEx01
                                $"First Played:             {firstPlayedDate.ToString("dd/MM/yyyy")}\n" +
                                $"Last Played:              {lastPlayed.ToString("dd/MM/yyyy")}\n" +
                                $"Previously Dropped:       {(previouslyDropped ? "Yes" : "No")}\n";
+            if (previouslyDropped)
+            {
+                currentGameInfo +=
+                               $"Previously Dropped Reason:{ReadWhyDroppedPreview()}\n";
+            }
             return currentGameInfo;
         }
 

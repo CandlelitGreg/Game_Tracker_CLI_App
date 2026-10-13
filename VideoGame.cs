@@ -32,8 +32,6 @@ namespace GameTrackerEx01
         }
     }
 
-
-
     public class VideoGame
     {
         public int gameID {get; set;} = -1;
@@ -218,9 +216,25 @@ namespace GameTrackerEx01
                 SaveGameUpdates();
             }
         }
-        public void UpdatePlayStatus()
+        public void AddPlayTime(float addedHrs)
         {
-
+            if (!played)
+            {
+                Console.WriteLine($"{gameName} has not been played and a log should not have been possible. Please check for errors in save files");
+                return;
+            }
+            switch (true)
+            {
+                case var _ when completed:
+                    Menu.FindDetailedGameByID<CompletedGame>(gameID).hoursPlayed += addedHrs;
+                    break;
+                case var _ when playing:
+                    Menu.FindDetailedGameByID<CurrentGame>(gameID).hoursPlayed += addedHrs;
+                    break;
+                case var _ when !completed && !playing:
+                    Menu.FindDetailedGameByID<DroppedGame>(gameID).hoursPlayed += addedHrs;
+                    break;
+            }
         }
         public void EditTitle()
         {
@@ -529,14 +543,35 @@ namespace GameTrackerEx01
                 Console.WriteLine("2. Add log entry");
                 Console.WriteLine("3. Edit game details");
                 Console.WriteLine("4. View similar games");
+                if (playing)
+                {
+                    Console.WriteLine("5. Log Game as Dropped");
+                    Console.WriteLine("6. Log Game as Completed");
+                }
+                if (completed)
+                {
+                    Console.WriteLine("5. Log Replay");
+                }
+                if (!playing && !completed)
+                {
+                    Console.WriteLine("5. Log Game as Playing");
+                    Console.WriteLine("6. Log Game as Completed");
+                }
             } 
             else
             {
                 Console.WriteLine("2. Edit game details");
                 Console.WriteLine("3. View similar games");
+                Console.WriteLine("4. Log Play Entry");
+                if (!purchased)
+                {
+                    Console.WriteLine("5. Purchase Game");
+                }
             }
             Console.WriteLine("0. Go back");
-            int userInput = played ? Format.GetSingleResponse(4, $"What would you like to do with {gameName}?") : Format.GetSingleResponse(3, $"What would you like to do with {gameName}?");
+            int maxInput = playing || played && !playing && !completed ? 6 : 5;
+            maxInput = !played && purchased ? 4 : maxInput;
+            int userInput = Format.GetSingleResponse(maxInput, $"What would you like to do with {gameName}?");
             switch (userInput)
             {
                 case 0:
@@ -566,14 +601,59 @@ namespace GameTrackerEx01
                     }
                     break;
                 case 4:
-                    ViewSimilarGames();
+                    if (played)
+                    {
+                        ViewSimilarGames();
+                    } else
+                    {
+                        switch (true)
+                        {
+                            case var _ when !purchased:
+                                Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).PlayGame();
+                                break;
+                            case var _ when purchased:
+                                Menu.FindDetailedGameByID<BackloggedGame>(gameID).PlayGame();
+                                break;
+                        }
+                    }
+                    break;
+                case 5:
+                    if (played)
+                    {
+                        switch (true)
+                        {
+                            case var _ when playing:
+                                Menu.FindDetailedGameByID<CurrentGame>(gameID).DropGame<CurrentGame>(Menu.FindDetailedGameByID<CurrentGame>(gameID));
+                                break;
+                            case var _ when completed:
+                                Menu.FindDetailedGameByID<CompletedGame>(gameID).InitiateReplay();
+                                break;
+                            case var _ when !playing && !completed:
+                                Menu.FindDetailedGameByID<DroppedGame>(gameID).LogRetry();
+                                break;
+                        }
+                    } else
+                    {
+                        if (!purchased)
+                        {
+                            Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).PurchaseGame();
+                        }
+                    }
+                    break;
+                case 6:
+                    switch (true)
+                    {
+                        case var _ when playing:
+                            Menu.FindDetailedGameByID<CurrentGame>(gameID).CompleteGame<CurrentGame>(Menu.FindDetailedGameByID<CurrentGame>(gameID));
+                            break;
+                        case var _ when !playing && !completed:
+                            Menu.FindDetailedGameByID<DroppedGame>(gameID).CompleteGame<DroppedGame>(Menu.FindDetailedGameByID<DroppedGame>(gameID));
+                            break;
+                    }
                     break;
             }
-            if (Format.GetClosedAnswer($"Do you want to keep interacting with {gameName}? (y/n)"))
-            {
-                OpenGameDetails();
-            }
-            return;
+            CSVHandler.UpdateAllFiles();
+            Menu.FindGameByID(gameID).OpenGameDetails();
         }
         public void ViewSimilarGames()
         {

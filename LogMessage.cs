@@ -14,9 +14,9 @@ namespace GameTrackerEx01
             Map(m => m.playDuration);
             Map(m => m.startedGame);
             Map(m => m.finishedGame);
+            Map(m => m.droppedGame);
         }
     }
-
     public sealed class RetrieveLogMessageMap : ClassMap<LogMessage>
     {
         public RetrieveLogMessageMap()
@@ -28,6 +28,7 @@ namespace GameTrackerEx01
             Map(m => m.playDuration);
             Map(m => m.startedGame);
             Map(m => m.finishedGame);
+            Map(m => m.droppedGame);
         }
     }
     public class LogMessage
@@ -39,6 +40,7 @@ namespace GameTrackerEx01
         public float playDuration {get; set;} = 0;
         public bool startedGame {get; set;} = false;
         public bool finishedGame {get; set;} = false;
+        public bool droppedGame {get; set;} = false;
 
         public void CreateLog(int gameID)
         {
@@ -51,7 +53,6 @@ namespace GameTrackerEx01
             SaveLogChanges();
             CheckLogInputs();
         }
-
         public DateOnly GetLogDate()
         {
             if (logDate != DateOnly.FromDateTime(new DateTime()) && !Format.GetClosedAnswer($"Log date is already set to {logDate.ToString("dd/MM/yyyy")}\nAre you sure you would like to change the log date? (y/n)"))
@@ -60,7 +61,6 @@ namespace GameTrackerEx01
             }
             return DateOnly.FromDateTime(Format.GetDateValue($"date this log entry is for in format dd/MM/yyyy"));
         }
-
         public string GetLogData()
         {
             if (logData != "" && !Format.GetClosedAnswer($"Log entry is already set to the following:\n ---   ---   ---\n{logData}\n ---   ---   ---\nAre you sure you would like to change the log entry? (y/n)"))
@@ -70,7 +70,6 @@ namespace GameTrackerEx01
             Console.WriteLine($"Please enter log entry and comments");
             return Format.ReplaceCommasInString(Console.ReadLine());
         }
-
         public float GetPlayDuration()
         {
             if (playDuration != 0 && !Format.GetClosedAnswer($"Log duration is already set to {playDuration}\nAre you sure you would like to change the log duration? (y/n)"))
@@ -78,9 +77,13 @@ namespace GameTrackerEx01
                 return playDuration;
             }
             Console.WriteLine($"Please input the approximate number of hours you spent during this play session of {Menu.FindGameByID(logGameID).gameName}");
-            return Format.ConvertStringToFloat(Console.ReadLine(), $"Please input the approximate number of hours you spent during this play session of {Menu.FindGameByID(logGameID).gameName}");
+            float playTime =  Format.ConvertStringToFloat(Console.ReadLine(), $"Please input the approximate number of hours you spent during this play session of {Menu.FindGameByID(logGameID).gameName}");
+            if (Format.GetClosedAnswer($"Would you like to automatically update your time spent with {Menu.FindGameByID(logGameID).gameName} by {playTime-playDuration}hrs? (y/n)"))
+            {
+                Menu.FindGameByID(logGameID).AddPlayTime(playTime-playDuration);
+            }
+            return playTime;
         }
-
         public void CheckLogInputs()
         {
             Console.WriteLine($"Please find the details of your log entry below:\n\n");
@@ -90,7 +93,6 @@ namespace GameTrackerEx01
                 EditLogInputs();
             }
         }
-
         public void DisplayLogDetails()
         {
             Console.WriteLine($"Displaying Data from Log Entry {Menu.FindGameByID(logGameID).RetrieveLogLocation(logMessageID)} for {Menu.FindGameByID(logGameID).gameName}\n");
@@ -98,12 +100,10 @@ namespace GameTrackerEx01
             Console.WriteLine($"Log Play Duration:        {playDuration}hrs");
             Console.WriteLine($"Log Entry Text:\n ---   ---   ---\n{logData}\n ---   ---   ---");
         }
-
         public string ReadLog()
         {
             return Format.ReturnCommasToString(logData);
         }
-
         public string ReadLogPreview()
         {
             string returnLog = Format.ReturnCommasToString(logData);
@@ -113,7 +113,6 @@ namespace GameTrackerEx01
             }
             return returnLog;
         }
-
         public void EditLogInputs()
         {
             Console.WriteLine("\n\nWhich information would you like to change?\n");
@@ -139,7 +138,6 @@ namespace GameTrackerEx01
             SaveLogChanges();
             EditLogInputs();
         }
-
         public void SaveLogChanges()
         {
             CSVHandler.UpdateInfoFile<LogMessage>(Menu.existingLogMessages, Menu.mainFiles.logEntryFile);
