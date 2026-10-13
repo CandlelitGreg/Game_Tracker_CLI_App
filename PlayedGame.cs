@@ -2,36 +2,6 @@ using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
 {
-
-    public sealed class PlayedGameMap : ClassMap<PlayedGame>
-    {
-        public PlayedGameMap()
-        {
-            Map(m => m.gameID);
-            Map(m => m.gameName);
-            Map(m => m.avgGameLength);
-            Map(m => m.gameGenreIDs).Convert(args => string.Join(";", args.Value.gameGenreIDs));
-            Map(m => m.deckPlayable);
-            Map(m => m.sessionGame);
-            Map(m => m.worthCompletionist);
-            Map(m => m.franchiseID);
-            Map(m => m.played);
-            Map(m => m.purchased);
-            Map(m => m.completed);
-            Map(m => m.playing);
-            Map(m => m.DLCIDs).Convert(args => string.Join(";", args.Value.DLCIDs));
-            Map(m => m.hoursPlayed);
-            Map(m => m.rating);
-            Map(m => m.initialExcitementLevel);
-            Map(m => m.initialImpressions);
-            Map(m => m.nextEntryID);
-            Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
-            Map(m => m.mainPlayDevice);
-            Map(m => m.modded);
-        }
-    }
-
-
     public class PlayedGame : VideoGame
     {
         public float hoursPlayed {get; set;}
@@ -40,7 +10,9 @@ namespace GameTrackerEx01
         public string initialImpressions {get; set;} //Contains comma replaced format
         public int nextEntryID {get; set;} = -1;
 
-        public string[] logMessages {get; set;} = [];
+        // public string[] logMessages {get; set;} = [];
+        public int[] logMessageIDs {get; set;} = [];
+
         public string mainPlayDevice {get; set;}
         public bool modded {get; set;}
 
@@ -315,7 +287,15 @@ namespace GameTrackerEx01
 
 
 
-
+        public string ReadInitialImpressionsPreview()
+        {
+            string abreviatedImpressions = Format.ReturnCommasToString(initialImpressions);
+            if (abreviatedImpressions.Length > 45)
+            {
+                abreviatedImpressions = $"{abreviatedImpressions.Substring(0,45)}...";
+            }
+            return abreviatedImpressions;
+        }
         public string ReadInitialImpressions()
         {
             return Format.ReturnCommasToString(initialImpressions);
@@ -339,28 +319,33 @@ namespace GameTrackerEx01
         public string DisplayPlayedInfo()
         {
             string playedGameInfo = 
-                                   $"Hours Played:      {hoursPlayed}\n" +
-                                   $"Rating:            {rating}\n" +
+                                   $"Hours Played:             {hoursPlayed}\n" +
+                                   $"Rating:                   {rating}\n" +
                                    $"Initial Excitement Level: {initialExcitementLevel}\n" +
-                                   $"\n vvv---Initial Impressions---vvv \n{ReadInitialImpressions()}\n ^^^---Initial Impressions---^^^\n\n";
+                                   $"Initial Impressions:      {ReadInitialImpressionsPreview()}\n";
             if (nextEntryID != -1)
             {
-                playedGameInfo += $"Next Entry:        {Menu.FindGameByID(nextEntryID).gameName}\n";
+                playedGameInfo += $"Next Entry:               {Menu.FindGameByID(nextEntryID).gameName}\n";
             }
-            if (logMessages.Length > 0)
+            if (logMessageIDs.Length > 0)
             {
-                for (int i = 0; i < logMessages.Length; i++)
+                for (int i = 0; i < logMessageIDs.Length; i++)
                 {
-                    playedGameInfo += $"Log Message {i + 1}:      {Format.ReturnCommasToString(logMessages[i])}\n";
+                    playedGameInfo += $"Log Message {i + 1}:\n";
+                    LogMessage currentLog = Menu.FindLog(logMessageIDs[i]);
+                    playedGameInfo += $"        Log Date:             {currentLog.logDate}\n";
+                    playedGameInfo += $"        Log Play Duration:    {currentLog.playDuration}\n";
+                    playedGameInfo += $"        Log Entry:            {currentLog.ReadLogPreview()}\n";
                 }
+                Console.WriteLine("\n");
             }
             if (!string.IsNullOrWhiteSpace(mainPlayDevice))
             {
-                playedGameInfo += $"Main Play Device:  {mainPlayDevice}\n";
+                playedGameInfo += $"Main Play Device:         {mainPlayDevice}\n";
             }
             if (modded)
             {
-                playedGameInfo += $"Modded:      Yes\n";
+                playedGameInfo += $"Modded:                   Yes\n";
             }
             return playedGameInfo;
         }
@@ -378,10 +363,8 @@ namespace GameTrackerEx01
             initialExcitementLevel = parentGame.initialExcitementLevel;
             initialImpressions = parentGame.initialImpressions;
             nextEntryID = parentGame.nextEntryID;
-            completed = parentGame.completed;
-            playing = parentGame.playing;
 
-            logMessages = parentGame.logMessages;
+            logMessageIDs = parentGame.logMessageIDs;
             modded = parentGame.modded;
             mainPlayDevice = parentGame.mainPlayDevice;
         }

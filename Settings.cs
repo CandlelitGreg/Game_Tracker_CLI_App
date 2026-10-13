@@ -9,8 +9,10 @@ namespace GameTrackerEx01
             Map(m => m.nextGameID);
             Map(m => m.nextFranchiseID);
             Map(m => m.nextGenreID);
+            Map(m => m.nextLogID);
             Map(m => m.genreFile);
             Map(m => m.franchiseFile);
+            Map(m => m.logEntryFile);
             Map(m => m.currentGameFile);
             Map(m => m.completedGameFile);
             Map(m => m.droppedGameFile);
@@ -46,8 +48,10 @@ namespace GameTrackerEx01
             Map(m => m.nextGameID);
             Map(m => m.nextFranchiseID);
             Map(m => m.nextGenreID);
+            Map(m => m.nextLogID);
             Map(m => m.genreFile);
             Map(m => m.franchiseFile);
+            Map(m => m.logEntryFile);
             Map(m => m.currentGameFile);
             Map(m => m.completedGameFile);
             Map(m => m.droppedGameFile);
@@ -78,9 +82,11 @@ namespace GameTrackerEx01
     public class SettingsInfo {
         public int nextGameID {get; set;}
         public int nextFranchiseID {get; set;}
-        public int nextGenreID {get;set;}
+        public int nextGenreID {get; set;}
+        public int nextLogID {get; set;}
         public string genreFile {get; set;}
         public string franchiseFile {get; set;}
+        public string logEntryFile {get; set;}
         public string currentGameFile {get; set;}
         public string completedGameFile {get; set;}
         public string droppedGameFile {get; set;}

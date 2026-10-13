@@ -238,7 +238,6 @@ namespace GameTrackerEx01
             excitementLevel = parentGame.excitementLevel;
             sequel = parentGame.sequel;
             previousEntryID = parentGame.previousEntryID;
-            purchased = parentGame.purchased;
         }
 
         public void PlayGame()
@@ -262,13 +261,14 @@ namespace GameTrackerEx01
 
         public string DisplayUnplayedGameInfo()
         {
-            string unplayedGameInfo = $"Excitement Level:  {excitementLevel}\n";
+            string unplayedGameInfo = $"Excitement Level:         {excitementLevel}\n";
             if (sequel)
             {
-                unplayedGameInfo += $"Sequel to:         {Menu.FindGameByID(previousEntryID).gameName}\n";
+            
+                unplayedGameInfo += $"Sequel to:                {Menu.FindGameByID(previousEntryID).gameName}\n";
             } else
             {
-                unplayedGameInfo += $"No relevant previous entry\n";
+                unplayedGameInfo += $"No Relevant Previous Entry\n";
             }
             return unplayedGameInfo;
         }

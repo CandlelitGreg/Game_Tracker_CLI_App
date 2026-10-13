@@ -13,6 +13,7 @@ namespace GameTrackerEx01
 
         public static List<Genre> existingGenres = [];
         public static List<Franchise> existingFranchises = [];
+        public static List<LogMessage> existingLogMessages = [];
         public static List<VideoGame> existingVideoGames = [];
         public static List<VideoGame> existingReplays = [];
 
@@ -31,6 +32,7 @@ namespace GameTrackerEx01
         {
             backupFiles = DownloadInfo<SettingsInfo>(settingsPath);
             mainFiles = backupFiles[backupFiles.Count-1];
+            existingLogMessages = DownloadInfo<LogMessage>(mainFiles.logEntryFile);
             existingGenres = DownloadInfo<Genre>(mainFiles.genreFile);
             existingFranchises = DownloadInfo<Franchise>(mainFiles.franchiseFile);
             existingCurrentGames = DownloadInfo<CurrentGame>(mainFiles.currentGameFile);
@@ -93,6 +95,9 @@ namespace GameTrackerEx01
                 case var _ when typeof(T) == typeof(SettingsInfo):
                     csv.Context.RegisterClassMap<RetrieveSettingsMap>();
                     break;
+                case var _ when typeof(T) == typeof(LogMessage):
+                    csv.Context.RegisterClassMap<RetrieveLogMessageMap>();
+                    break;
             }
             return csv.GetRecords<T>().ToList();
         }
@@ -112,6 +117,13 @@ namespace GameTrackerEx01
             backupFiles[backupFiles.Count - 1] = mainFiles;
             CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGameID - 1;
+        }
+        public static int GetAndUpdateNextLogID()
+        {
+            mainFiles.nextLogID++;
+            backupFiles[backupFiles.Count - 1] = mainFiles;
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
+            return mainFiles.nextLogID - 1;
         }
         public static int GetAndUpdateNextGenreID()
         {
@@ -276,6 +288,28 @@ namespace GameTrackerEx01
             }
             return -1;
 
+        }
+        public static LogMessage FindLog(int searchID)
+        {
+            int highIndex = existingLogMessages.Count-1;
+            int lowIndex = 0;
+            while (lowIndex <= highIndex)
+            {
+                int midIndex = lowIndex + (highIndex - lowIndex) / 2;
+                if (existingLogMessages[midIndex].logMessageID == searchID)
+                {
+                    return existingLogMessages[midIndex];
+                }
+                if (existingLogMessages[midIndex].logMessageID < searchID)
+                {
+                    lowIndex = midIndex + 1;
+                }
+                else
+                {
+                    highIndex = midIndex - 1;
+                }
+            }
+            return null;
         }
         public static VideoGame FindGameByID(int searchID)
         {

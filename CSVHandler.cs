@@ -13,6 +13,7 @@ namespace GameTrackerEx01
         {
             UpdateInfoFile<Genre>(Menu.existingGenres, Menu.mainFiles.genreFile);
             UpdateInfoFile<Franchise>(Menu.existingFranchises, Menu.mainFiles.franchiseFile);
+            UpdateInfoFile<LogMessage>(Menu.existingLogMessages, Menu.mainFiles.logEntryFile);
             UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
             UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, Menu.mainFiles.completedGameFile);
             UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, Menu.mainFiles.droppedGameFile);
@@ -52,6 +53,9 @@ namespace GameTrackerEx01
                 case List<SettingsInfo>:
                     csv.Context.RegisterClassMap<SettingsMap>();
                     break;
+                case List<LogMessage>:
+                    csv.Context.RegisterClassMap<LogMessageMap>();
+                    break;
             }
             csv.WriteRecords(infoData);
         }
@@ -62,6 +66,8 @@ namespace GameTrackerEx01
             newSettingsInfo.nextGameID = Menu.mainFiles.nextGameID;
             newSettingsInfo.nextFranchiseID = Menu.mainFiles.nextFranchiseID;
             newSettingsInfo.nextGenreID = Menu.mainFiles.nextGenreID;
+            newSettingsInfo.nextLogID = Menu.mainFiles.nextLogID;
+            newSettingsInfo.logEntryFile = $"saveFiles/logMessages_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.genreFile = $"saveFiles/gameGenres_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.franchiseFile = $"saveFiles/gameFranchises_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.currentGameFile = $"saveFiles/currentGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
@@ -71,6 +77,7 @@ namespace GameTrackerEx01
             newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
 
 
+            UpdateInfoFile<LogMessage>(Menu.existingLogMessages, newSettingsInfo.logEntryFile);
             UpdateInfoFile<Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
             UpdateInfoFile<Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
             UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);
@@ -91,6 +98,8 @@ namespace GameTrackerEx01
             newSettingsInfo.nextGameID = 0;//Menu.mainFiles.nextGameID;
             newSettingsInfo.nextFranchiseID = 0;//Menu.mainFiles.nextFranchiseID;
             newSettingsInfo.nextGenreID = 0;//Menu.mainFiles.nextGenreID;
+            newSettingsInfo.nextLogID = 0;
+            newSettingsInfo.logEntryFile = $"saveFiles/logMessages_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.genreFile = $"saveFiles/gameGenres_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.franchiseFile = $"saveFiles/gameFranchises_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.currentGameFile = $"saveFiles/currentGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
@@ -100,6 +109,7 @@ namespace GameTrackerEx01
             newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
 
 
+            UpdateInfoFile<LogMessage>(Menu.existingLogMessages, newSettingsInfo.logEntryFile);
             UpdateInfoFile<Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
             UpdateInfoFile<Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
             UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);

@@ -96,7 +96,7 @@ namespace GameTrackerEx01
 
         public string DisplayBackloggedGameInfo()
         {
-            string backloggedGameInfo = DisplayUnplayedGameInfo() + $"Purchase Date:     {purchaseDate.ToString("dd/MM/yyyy")}\n";
+            string backloggedGameInfo = DisplayUnplayedGameInfo() + $"Purchase Date:            {purchaseDate.ToString("dd/MM/yyyy")}\n";
             return backloggedGameInfo;
         }
 

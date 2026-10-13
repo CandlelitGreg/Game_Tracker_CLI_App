@@ -25,7 +25,8 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
+            // Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
+            Map(m => m.logMessageIDs).Convert(args => string.Join(";", args.Value.logMessageIDs));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
             Map(m => m.firstPlayedDate);
@@ -59,7 +60,8 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
+            // Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
+            Map(m => m.logMessageIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessageIDs")) ? Array.Empty<int>() : args.Row.GetField("logMessageIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
             Map(m => m.firstPlayedDate);
@@ -137,7 +139,15 @@ namespace GameTrackerEx01
             return Console.ReadLine();
             //TODO: build this out to be a multi-line reading func
         }
-
+        public string ReadReviewPreview()
+        {
+            string abreviatedReview = Format.ReturnCommasToString(review);
+            if (abreviatedReview.Length > 45)
+            {
+                abreviatedReview = $"{abreviatedReview.Substring(0,45)}...";
+            }
+            return abreviatedReview;
+        }
         public string ReadReview()
         {
             return Format.ReturnCommasToString(review);
@@ -278,15 +288,16 @@ namespace GameTrackerEx01
         {
             string completedGameInfo = DisplayPlayedInfo();
             completedGameInfo += 
-                                 $"First Played Date: {firstPlayedDate.ToString("dd/MM/yyyy")}\n" +
-                                 $"Completion Date:   {completionDate.ToString("dd/MM/yyyy")}\n" +
-                                 $"\n vvv---Review---vvv \n{ReadReview()}\n ^^^---Review---^^^\n\n";
+                                 $"First Played Date:        {firstPlayedDate.ToString("dd/MM/yyyy")}\n" +
+                                 $"Completion Date:          {completionDate.ToString("dd/MM/yyyy")}\n" +
+                                 $"Review:                   {ReadReviewPreview()}\n";
             if (replaying)
             {
-                completedGameInfo += $"Currently Replaying: Yes\n";
+                completedGameInfo += $"Currently Replaying:      Yes\n";
+                                     
             } else if (wantToPlayAgain)
             {
-                completedGameInfo += $"Want to Play Again: {(wantToPlayAgain ? "Yes" : "No")}\n";
+                completedGameInfo += $"Want to Play Again:       {(wantToPlayAgain ? "Yes" : "No")}\n";
             }
             return completedGameInfo;
         }

@@ -218,7 +218,6 @@ namespace GameTrackerEx01
                 SaveGameUpdates();
             }
         }
-
         public void UpdatePlayStatus()
         {
 
@@ -525,10 +524,19 @@ namespace GameTrackerEx01
         {
             Console.WriteLine($"What would you like to do with {gameName}?\n");
             Console.WriteLine("1. View game details");
-            Console.WriteLine("2. Edit game details");
-            Console.WriteLine("3. View similar games");
+            if (played)
+            {
+                Console.WriteLine("2. Add log entry");
+                Console.WriteLine("3. Edit game details");
+                Console.WriteLine("4. View similar games");
+            } 
+            else
+            {
+                Console.WriteLine("2. Edit game details");
+                Console.WriteLine("3. View similar games");
+            }
             Console.WriteLine("0. Go back");
-            int userInput = Format.GetSingleResponse(3, $"What would you like to do with {gameName}?");
+            int userInput = played ? Format.GetSingleResponse(4, $"What would you like to do with {gameName}?") : Format.GetSingleResponse(3, $"What would you like to do with {gameName}?");
             switch (userInput)
             {
                 case 0:
@@ -537,9 +545,27 @@ namespace GameTrackerEx01
                     Console.WriteLine(DisplayGameDetails());
                     break;
                 case 2:
-                    EditGameDetails();
+                    if (played)
+                    {
+                        AddLog();
+                    }
+                    else
+                    {
+                        EditGameDetails();
+                    }
+                    
                     break;
                 case 3:
+                    if (played)
+                    {
+                        EditGameDetails();
+                    }
+                    else
+                    {
+                        ViewSimilarGames();
+                    }
+                    break;
+                case 4:
                     ViewSimilarGames();
                     break;
             }
@@ -603,11 +629,11 @@ namespace GameTrackerEx01
         public string DisplayGameDetails()
         {
             string details = "";
-            details += $"Title:             {gameName}\n";
-            details += $"Avg Game Length:   {avgGameLength}\n";
+            details += $"Title:                    {gameName}\n";
+            details += $"Avg Game Length:          {avgGameLength}\n";
             if (gameGenreIDs.Length >= 1)
             {
-                details += $"Game Genres:       {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[0])].genreName}";
+                details += $"Game Genres:              {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[0])].genreName}";
                 for (int i = 1; i < gameGenreIDs.Length; i++)
                 {
                     details += $" || {Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].genreName}";
@@ -615,36 +641,36 @@ namespace GameTrackerEx01
                 details += "\n";
             } else
             {
-                details += $"Game Genres:       None\n";
+                details += $"Game Genres:              None\n";
             }
-            details += $"Playable on Deck:  {deckPlayable}\n";
+            details += $"Playable on Deck:         {deckPlayable}\n";
             if (played)
             {
                 if (!completed && !playing)
                 {
-                    details += $"Played Status:     Dropped\n";
+                    details += $"Played Status:            Dropped\n";
                     details +=Menu.FindDetailedGameByID<DroppedGame>(gameID).DisplayDroppedGameInfo();
                 }
             } else
             {
                 if (purchased)
                 {
-                    details += $"Played Status:     Backlogged\n";
+                    details += $"Played Status:            Backlogged\n";
                     details += Menu.FindDetailedGameByID<BackloggedGame>(gameID).DisplayBackloggedGameInfo();
                 } else
                 {
-                    details += $"Played Status:     Unpurchased\n";
+                    details += $"Played Status:            Unpurchased\n";
                     details += Menu.FindDetailedGameByID<UnpurchasedGame>(gameID).DisplayUnpurchasedGameInfo();
                 }
             }
             if (completed)
             {
-                details += $"Played Status:     Completed\n";
+                details += $"Played Status:            Completed\n";
                 details += Menu.FindDetailedGameByID<CompletedGame>(gameID).DisplayCompletedGameInfo();
             }
             if (playing)
             {
-                details += $"Played Status:     Currently Playing\n";
+                details += $"Played Status:            Currently Playing\n";
                 details += Menu.FindDetailedGameByID<CurrentGame>(gameID).DisplayCurrentGameInfo();
             }
             return details;
@@ -802,6 +828,61 @@ namespace GameTrackerEx01
             }
             return 0;
         }
+        public void AddLog()
+        {
+            LogMessage newLog = new LogMessage();
+            newLog.CreateLog(gameID);
+            AddLogToList(newLog.logMessageID);
+        }
+        public string RetrieveLogLocation(int logMessageID)
+        {
+            if (!played)
+            {
+                return "Game Not Played Therefore Log Shouldn't Exist";
+            }
+            int[] logMessageIDList = [];
+            switch (true)
+            {
+                case var _ when completed:
+                    logMessageIDList = Menu.FindDetailedGameByID<CompletedGame>(gameID).logMessageIDs;
+                    break;
+                case var _ when playing:
+                    logMessageIDList = Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs;
+                    break;
+                case var _ when !playing && !completed:
+                    logMessageIDList = Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs;
+                    break;
+            }
+            string fractionString = "";
+            for (int i = 0; i < logMessageIDList.Length; i++)
+            {
+                if (logMessageIDList[i] == logMessageID)
+                {
+                    fractionString = $"{i+1}/";
+                }
+            }
+            return $"{fractionString}{logMessageIDList.Length}";
+        }
+        public void AddLogToList(int logID)
+        {
+            if (!played)
+            {
+                Console.WriteLine($"Error has occured.\nLog should not be created for {gameName} since it has not been played\nPlease check log entry {logID} manually to discover and solve issue");
+                return;
+            }
+            switch (true)
+            {
+                case var _ when completed:
+                    Menu.FindDetailedGameByID<CompletedGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<CompletedGame>(gameID).logMessageIDs.Append(logID).ToArray();
+                    break;
+                case var _ when playing:
+                    Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs.Append(logID).ToArray();
+                    break;
+                case var _ when !playing && !completed:
+                    Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs.Append(logID).ToArray();
+                    break;
+            }
+        }
         public void UpdateAllGenreStats()
         {
             for (int i = 0; i < gameGenreIDs.Length; i++)
@@ -821,6 +902,9 @@ namespace GameTrackerEx01
             franchiseID = parentGame.franchiseID;
             played = parentGame.played;
             DLCIDs = parentGame.DLCIDs;
+            completed = parentGame.completed;
+            playing = parentGame.playing;
+            purchased = parentGame.purchased;
         }
         public void SaveGameUpdates()
         {

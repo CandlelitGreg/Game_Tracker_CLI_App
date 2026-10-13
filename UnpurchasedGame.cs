@@ -215,12 +215,12 @@ namespace GameTrackerEx01
         public string DisplayUnpurchasedGameInfo()
         {
             string unpurchasedGameInfo = DisplayUnplayedGameInfo() +
-                                       $"Full Price:        {fullPrice}\n" +
-                                       $"Lowest Sale Price: {lowestSalePrice}\n" +
-                                       $"Released:          {(released ? "Yes" : "No")}\n";
+                                       $"Full Price:               {fullPrice}\n" +
+                                       $"Lowest Sale Price:        {lowestSalePrice}\n" +
+                                       $"Released:                 {(released ? "Yes" : "No")}\n";
             if (!released)
             {
-                unpurchasedGameInfo += $"Release Date:      {(!released ? releaseDate.ToString("dd/MM/yyyy") : "N/A")}\n";
+                unpurchasedGameInfo += $"Release Date:             {(!released ? releaseDate.ToString("dd/MM/yyyy") : "N/A")}\n";
             }
             return unpurchasedGameInfo;
         }
