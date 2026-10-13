@@ -680,31 +680,32 @@ namespace GameTrackerEx01
             }
 
             //Sort final array by number of related genres
-            // similarGames.Sort(similarGames, (a,b) => a.numRelGenres.CompareTo(b.numRelGenres));
             similarGames = similarGames.OrderByDescending(game => game.numRelGenres).ToArray();
-            for (int i = 0; i < similarGames.Length; i++)
-            {
-                Console.WriteLine($"{similarGames[i].similarGameID}, {similarGames[i].numRelGenres}");
-            }
             (int similarGameID, int numRelGenres)[] similarFilteredGames = [];
 
-            //Create list without any games played, or awaiting previous completion
-            Console.WriteLine($"\n\nGames similar to {gameName}:\n\n");
-            for (int i = 0; i < similarGames.Length; i++)
-            {
-                if (i < 5)
-                {
-                    Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarGames[i].similarGameID).DisplayGameDetails()}\n\n");
-                }
-            }
-
             similarFilteredGames = similarGames.Where(game => Menu.FindGameByID(game.similarGameID).ReadyToRecommend(Menu.mainFiles.filterWaitingForPrequelSetting, Menu.mainFiles.filterUnreleasedSetting, Menu.mainFiles.filterReplaysSetting, Menu.mainFiles.filterPlayedSetting, Menu.mainFiles.filterPlayingSetting, Menu.mainFiles.filterDroppedSetting, Menu.mainFiles.filterNotPurchasedSetting, Menu.mainFiles.CalculateDeckPlayableFilter(deckPlayable), Menu.mainFiles.CalculateAvgLengthFilter(sessionGame), Menu.mainFiles.CalculateAvgLengthBase(avgGameLength), Menu.mainFiles.CalculateAvgLengthDeviation(avgGameLength), Menu.mainFiles.requiresCertainExcitementSetting, Menu.mainFiles.requiredExcitementLevelOrRatingSetting, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).onlySession, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).ignoreSession) == true).ToArray();
+            similarFilteredGames = similarFilteredGames.Where(game => game.similarGameID != gameID).ToArray();
 
             Console.WriteLine($"Filtered games similar to {gameName}:");
             for (int i = 0; i < similarFilteredGames.Length; i++)
             {
-                Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarFilteredGames[i].similarGameID).DisplayGameDetails()}");
+                Console.WriteLine($"\n{i+1}. {Menu.FindGameByID(similarFilteredGames[i].similarGameID).gameName}");
+                if (i == 4)
+                {
+                    i = similarFilteredGames.Length;
+                }
             }
+            Console.WriteLine("\n0. Go back");
+            int userInput = similarFilteredGames.Length > 5 ? Format.GetSingleResponse(5, "Please input the index of the game you would like to interact with, or press 0 to go back") : Format.GetSingleResponse(similarFilteredGames.Length, "Please input the index of the game you would like to interact with, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindGameByID(similarFilteredGames[userInput-1].similarGameID).OpenGameDetails();
+                    break;
+            }
+            ViewSimilarGames();
         }
         public string DisplayGameDetails()
         {

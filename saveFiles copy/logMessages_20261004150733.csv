@@ -1,0 +1,4 @@
+logMessageID,logGameID,logDate,logData,playDuration,startedGame,finishedGame,droppedGame
+0,51,10/13/2026,Beat the final boss and unlocked the final car!,2.1,False,False,False
+1,52,10/10/2026,Expected more variation in gameplay but I suppose you shouldn't mess with what works,3.6,False,False,False
+3,52,10/10/2026,Expected a more revolutionary experience but I suppose I should've played the game less than 14 years later if that's what I wanted,3.6,False,True,False

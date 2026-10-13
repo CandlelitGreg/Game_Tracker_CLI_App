@@ -152,7 +152,17 @@ namespace GameTrackerEx01
                     Console.WriteLine($"{i + 1}: {franchise.franchiseName}");
                 }
             }
-            //TODO: Add functionality to view details of each franchise associated with the genre
+            Console.WriteLine($"Please input index for {genreName} franchise you would like to interact with, or press 0 to go back");
+            int userInput = Format.GetSingleResponse(attachedFranchiseIDs.Length, $"Please input index for {genreName} franchise you would like to interact with, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.existingFranchises[Menu.FindFranchise(attachedFranchiseIDs[userInput-1])].OpenFranchise();
+                    break;
+            }
+            ViewAssociatedGames();
         }
         public void ViewAssociatedGames()
         {
@@ -166,7 +176,17 @@ namespace GameTrackerEx01
                     Console.WriteLine($"{i + 1}: {game.gameName}");
                 }
             }
-            //TODO: Add functionality to view details of each game associated with the genre
+            Console.WriteLine($"Please input index for {genreName} game you would like to interact with, or press 0 to go back");
+            int userInput = Format.GetSingleResponse(attachedGameIDs.Length, $"Please input index for {genreName} game you would like to interact with, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindGameByID(attachedGameIDs[userInput-1]).OpenGameDetails();
+                    break;
+            }
+            ViewAssociatedGames();
         }
         public void EditGenreDetails()
         {

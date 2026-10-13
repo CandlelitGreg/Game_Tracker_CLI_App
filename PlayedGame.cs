@@ -1,3 +1,4 @@
+using System;
 using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
@@ -190,6 +191,9 @@ namespace GameTrackerEx01
             if (rating != 0)
             {
                 Console.WriteLine($"Your current rating on file for {gameName} is {rating}\nWhat is your updated rating?");
+            } else
+            {
+                Console.WriteLine($"What is your rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)?");
             }
             int newRating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating for {gameName} from 1-10? (1: Horrible, 10: Amazing)?");
             while (newRating > 10 || newRating < 1)
@@ -202,14 +206,21 @@ namespace GameTrackerEx01
                 return;
             }
             rating = newRating;
-            SaveGameUpdates();
         }
 
         public void EditInitialExcitement()
         {
-            if (initialExcitementLevel != 0)
+            if (initialExcitementLevel != 0 )
             {
-                Console.WriteLine($"Your initial excitement for {gameName} is currently {initialExcitementLevel}\nWhat would you like to change your initial excitement rating to?");
+                if (!Format.GetClosedAnswer($"Would you like to update your initial excitement rating from {initialExcitementLevel} for {gameName}? (y/n)"))
+                {
+                    return;
+                }
+                Console.WriteLine($"What would you like to change your initial excitement rating to?");
+            }
+            else
+            {
+                Console.WriteLine($"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
             }
             int newExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
             while (newExcitementLevel > 10 || newExcitementLevel < 1)
@@ -222,7 +233,6 @@ namespace GameTrackerEx01
                 return;
             }
             initialExcitementLevel = newExcitementLevel;
-            SaveGameUpdates();
         }
 
         public void EditSequelStatus()
