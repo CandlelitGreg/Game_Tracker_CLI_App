@@ -24,7 +24,6 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            // Map(m => m.logMessages).Convert(args => string.Join("/?/>>^&*!/?/", args.Value.logMessages));
             Map(m => m.logMessageIDs).Convert(args => string.Join(";", args.Value.logMessageIDs));
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);
@@ -58,7 +57,6 @@ namespace GameTrackerEx01
             Map(m => m.initialExcitementLevel);
             Map(m => m.initialImpressions);
             Map(m => m.nextEntryID);
-            // Map(m => m.logMessages).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessages")) ? Array.Empty<string>() : args.Row.GetField("logMessages")?.Split("/?/>>^&*!/?/").ToArray() ?? Array.Empty<string>());
             Map(m => m.logMessageIDs).Convert(args => string.IsNullOrWhiteSpace(args.Row.GetField("logMessageIDs")) ? Array.Empty<int>() : args.Row.GetField("logMessageIDs")?.Split(";").Select(int.Parse).ToArray() ?? Array.Empty<int>());
             Map(m => m.mainPlayDevice);
             Map(m => m.modded);

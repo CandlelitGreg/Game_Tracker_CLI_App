@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Game_Tracker_CLI_App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e359c1fba5bf3caa6034444ec99656e32f0d40d2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+89546fe670cc51771c4fe677e82256f1538163fc")]
 [assembly: System.Reflection.AssemblyProductAttribute("Game_Tracker_CLI_App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Game_Tracker_CLI_App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

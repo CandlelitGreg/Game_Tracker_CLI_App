@@ -31,7 +31,7 @@ namespace GameTrackerEx01
         public static void GetStats()
         {
             backupFiles = DownloadInfo<SettingsInfo>(settingsPath);
-            mainFiles = backupFiles[backupFiles.Count-1];
+            mainFiles = Menu.FindSettingsFile(backupFiles[0].activeSettingsID);
             existingLogMessages = DownloadInfo<LogMessage>(mainFiles.logEntryFile);
             existingGenres = DownloadInfo<Genre>(mainFiles.genreFile);
             existingFranchises = DownloadInfo<Franchise>(mainFiles.franchiseFile);
@@ -64,6 +64,25 @@ namespace GameTrackerEx01
             //     Console.WriteLine($"{i + 1}.");
             //     existingGenres[i].ViewGenreAverages();
             // }
+        }
+        public static void ImportStats()
+        {
+            backupFiles = DownloadInfo<SettingsInfo>(settingsPath);
+            mainFiles = Menu.FindSettingsFile(backupFiles[0].activeSettingsID);
+            existingLogMessages = DownloadInfo<LogMessage>(mainFiles.logEntryFile);
+            existingGenres = DownloadInfo<Genre>(mainFiles.genreFile);
+            existingFranchises = DownloadInfo<Franchise>(mainFiles.franchiseFile);
+            existingCurrentGames = DownloadInfo<CurrentGame>(mainFiles.currentGameFile);
+            existingCompletedGames = DownloadInfo<CompletedGame>(mainFiles.completedGameFile);
+            existingDroppedGames = DownloadInfo<DroppedGame>(mainFiles.droppedGameFile);
+            existingUnpurchasedGames = DownloadInfo<UnpurchasedGame>(mainFiles.unpurchasedGameFile);
+            CheckAllReleaseDates();
+            existingBackloggedGames = DownloadInfo<BackloggedGame>(mainFiles.backloggedGameFile);
+            var allGames = GetAllVideoGames();
+            existingVideoGames.AddRange(allGames.vgs);
+            existingReplays.AddRange(allGames.replays);
+            SortGameLists();
+            RecalculateAllGenreStats();
         }
         public static List<T> DownloadInfo<T>(string filepath)
         {
@@ -114,23 +133,26 @@ namespace GameTrackerEx01
         public static int GetAndUpdateNextGameID()
         {
             mainFiles.nextGameID++;
-            backupFiles[backupFiles.Count - 1] = mainFiles;
             CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGameID - 1;
         }
         public static int GetAndUpdateNextLogID()
         {
             mainFiles.nextLogID++;
-            backupFiles[backupFiles.Count - 1] = mainFiles;
             CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextLogID - 1;
         }
         public static int GetAndUpdateNextGenreID()
         {
             mainFiles.nextGenreID++;
-            backupFiles[backupFiles.Count - 1] = mainFiles;
             CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             return mainFiles.nextGenreID - 1;
+        }
+        public static int GetAndUpdateSettingsID()
+        {
+            backupFiles.ForEach(settings => settings.nextSettingsID++);
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
+            return mainFiles.nextSettingsID - 1;
         }
         public static void AddNewGenre()
         {
@@ -301,6 +323,28 @@ namespace GameTrackerEx01
                     return existingLogMessages[midIndex];
                 }
                 if (existingLogMessages[midIndex].logMessageID < searchID)
+                {
+                    lowIndex = midIndex + 1;
+                }
+                else
+                {
+                    highIndex = midIndex - 1;
+                }
+            }
+            return null;
+        }
+        public static SettingsInfo FindSettingsFile(int searchID)
+        {
+            int highIndex = backupFiles.Count-1;
+            int lowIndex = 0;
+            while (lowIndex <= highIndex)
+            {
+                int midIndex = lowIndex + (highIndex - lowIndex) / 2;
+                if (backupFiles[midIndex].settingsID == searchID)
+                {
+                    return backupFiles[midIndex];
+                }
+                if (backupFiles[midIndex].settingsID < searchID)
                 {
                     lowIndex = midIndex + 1;
                 }
@@ -487,6 +531,13 @@ namespace GameTrackerEx01
                 existingGenres[i].RecalculateGenreStats();
             }
         }        
+        public static void SetCurrentSettings(int settingsID)
+        {
+            backupFiles.ForEach(settings => settings.activeSettingsID = settingsID);
+            CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
+            mainFiles = FindSettingsFile(settingsID);
+            ImportStats();
+        }
         public static void ViewBackups()
         {
 

@@ -6,6 +6,11 @@ namespace GameTrackerEx01
     {
         public SettingsMap()
         {
+            Map(m => m.dateLastUsed).Convert(args => args.Value.activeSettingsID == args.Value.settingsID ? DateOnly.FromDateTime(DateTime.Now).ToString("MM/dd/yyyy") : args.Value.dateLastUsed.ToString("MM/dd/yyyy"));
+            Map(m => m.settingsID);
+            Map(m => m.fileName);
+            Map(m => m.nextSettingsID);
+            Map(m => m.activeSettingsID);
             Map(m => m.nextGameID);
             Map(m => m.nextFranchiseID);
             Map(m => m.nextGenreID);
@@ -45,6 +50,11 @@ namespace GameTrackerEx01
     {
         public RetrieveSettingsMap()
         {
+            Map(m => m.dateLastUsed);
+            Map(m => m.settingsID);
+            Map(m => m.fileName);
+            Map(m => m.nextSettingsID);
+            Map(m => m.activeSettingsID);
             Map(m => m.nextGameID);
             Map(m => m.nextFranchiseID);
             Map(m => m.nextGenreID);
@@ -80,6 +90,11 @@ namespace GameTrackerEx01
         }
     }
     public class SettingsInfo {
+        public DateOnly dateLastUsed {get; set;} = DateOnly.FromDateTime(DateTime.Now);
+        public int settingsID {get; set;}
+        public string fileName {get; set;}
+        public int nextSettingsID {get; set;}
+        public int activeSettingsID {get; set;}
         public int nextGameID {get; set;}
         public int nextFranchiseID {get; set;}
         public int nextGenreID {get; set;}
@@ -523,7 +538,113 @@ namespace GameTrackerEx01
 
         public void ManageBackupsSettings()
         {
-            
+            Console.WriteLine("\n\nWelcome to your File Manager!\nPlease select how you would like to interact with your save files below:\n");
+            Console.WriteLine("1. Create a Backup");
+            Console.WriteLine("2. Switch Save Files");
+            Console.WriteLine("3. Create a Fresh Save");
+            Console.WriteLine("4. Change File Name");
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(4, "What action would you like to take?");
+            switch (userInput)
+            {
+                case 1:
+                    CreateBackup();
+                    break;
+                case 2:
+                    SwitchSaveFiles();
+                    break;
+                case 3:
+                    CreateFreshSave();
+                    break;
+                case 4:
+                    ManageSaveNames();
+                    break;
+                case 0:
+                    return;
+            }
+            ManageBackupsSettings();
+        }
+
+        public void CreateBackup()
+        {
+            SettingsInfo newSettingsInfo = CSVHandler.CreateBackup();
+            string settingsName = Format.AskForInput("name for your backup save");
+            newSettingsInfo.fileName = settingsName;
+            newSettingsInfo.dateLastUsed = DateOnly.FromDateTime(DateTime.Now);
+            Console.WriteLine($"A backup of your files has been created and is saved under the name {settingsName}");
+            SaveSettings();
+        }
+
+        public void SwitchSaveFiles()
+        {
+            Console.WriteLine("\n\nAll your existing saves have been listed below\nPlease select which save you would like to use:\n");
+            List<SettingsInfo> sortedSettings = Menu.backupFiles.OrderByDescending(settings => settings.dateLastUsed).ToList();
+            for (int i = 0; i < sortedSettings.Count; i++)
+            {
+                if (sortedSettings[i].settingsID == sortedSettings[i].activeSettingsID)
+                {
+                    Console.WriteLine($"{i+1}. {sortedSettings[i].fileName} --> --> CURRENT USED SAVE FILE <-- <-- {sortedSettings[i].dateLastUsed.ToString("dd/MM/yyyy")}");
+                }
+                else
+                {
+                    Console.WriteLine($"{i+1}. {sortedSettings[i].fileName} <-- <-- LAST UPDATED --> --> {sortedSettings[i].dateLastUsed.ToString("dd/MM/yyyy")}");
+                }
+            }
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(sortedSettings.Count, "What action would you like to take?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    if (Format.GetClosedAnswer($"Are you sure you would like to set {sortedSettings[userInput-1].fileName}, last update on {sortedSettings[userInput-1].dateLastUsed.ToString("dd/MM/yyyy")}, as your current save? (y/n)"))
+                    {
+                        Menu.SetCurrentSettings(sortedSettings[userInput-1].settingsID);
+                    }
+                    break;
+            }
+            SaveSettings();
+            SwitchSaveFiles();
+        }
+
+        public void CreateFreshSave()
+        {
+            if (!Format.GetClosedAnswer("Are you sure you would like to create a fresh save with NO saved data, INCLUDING games, genres, and franchises? (y/n)\nPlease note that previous saves will still be usable if switched to via the File Manager"))
+            {
+                return;
+            }
+            SettingsInfo newSettingsInfo = Menu.FindSettingsFile(CSVHandler.CreateRefresh());
+            string settingsName = Format.AskForInput("name for your fresh save");
+            newSettingsInfo.fileName = settingsName;
+            newSettingsInfo.dateLastUsed = DateOnly.FromDateTime(DateTime.Now);
+            Console.WriteLine($"A fresh save has been created and is saved under the name {settingsName}\nIf you would like to revert to a previous save with the entries removed from this save, please do so from the File Manager");
+            SaveSettings();
+        }
+
+        public void ManageSaveNames()
+        {
+            Console.WriteLine("\n\nAll your existing saves have been listed below\nPlease select which save you would like to alter:\n");
+            List<SettingsInfo> sortedSettings = Menu.backupFiles.OrderByDescending(settings => settings.dateLastUsed).ToList();
+            for (int i = 0; i < sortedSettings.Count; i++)
+            {
+                Console.WriteLine($"{i+1}. {sortedSettings[i].fileName} --> --> LAST UPDATED --> {sortedSettings[i].dateLastUsed.ToString("dd/MM/yyyy")}");
+            }
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(sortedSettings.Count, "What action would you like to take?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    string newName = Format.AskForInput("new name for your save file");
+                    if (Format.GetClosedAnswer($"Are you sure you would like to set the name of {sortedSettings[userInput-1].fileName}, last update on {sortedSettings[userInput-1].dateLastUsed.ToString("dd/MM/yyyy")}, to {newName}? (y/n)"))
+                    {
+                       sortedSettings[userInput-1].fileName = newName;
+                    }
+                    break;
+            }
+            SaveSettings();
+            SwitchSaveFiles();
         }
 
         public void ManageLandingPageSettings()

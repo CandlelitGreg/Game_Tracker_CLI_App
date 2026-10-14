@@ -193,8 +193,19 @@ namespace GameTrackerEx01
             }
             for (int i = 0; i < displayedGames.Count; i++)
             {
-                Console.WriteLine($"\n{i+1}.\n{displayedGames[i].DisplayGameDetails()}");
+                Console.WriteLine($"\n{i+1}. {displayedGames[i].gameName}");
             }
+            Console.WriteLine("\nInput the number for the game you would like to interact with, or press 0 to go back");
+            int userInput = Format.GetSingleResponse(displayedGames.Count, "Please input the number for the game you would like to interact with, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindGameByID(displayedGames[userInput-1].gameID).OpenGameDetails();
+                    break;
+            }
+            GetGeneralGameRecommendation();
         }
 
         public static void GetSpecificGameRecommendation()
@@ -344,8 +355,19 @@ namespace GameTrackerEx01
             Console.WriteLine($"\n\nPlease find the results for your search:\n\n");
             for (int i = 0; i < similarUnplayedReadyGames.Length; i++)
             {
-                Console.WriteLine($"\n{i+1}.\n{Menu.FindGameByID(similarUnplayedReadyGames[i].similarGameID).DisplayGameDetails()}");
+                Console.WriteLine($"\n{i+1}. {Menu.FindGameByID(similarUnplayedReadyGames[i].similarGameID).gameName}");
             } 
+            Console.WriteLine("\nInput the number for the game you would like to interact with, or press 0 to go back");
+            int userInput = Format.GetSingleResponse(similarUnplayedReadyGames.Length, "Please input the number for the game you would like to interact with, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindGameByID(similarUnplayedReadyGames[userInput-1].similarGameID).OpenGameDetails();
+                    break;
+            }
+            GetSpecificGameRecommendation();
         }
 
         public static void OpenGameRecommender()

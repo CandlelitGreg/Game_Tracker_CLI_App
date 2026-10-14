@@ -60,9 +60,11 @@ namespace GameTrackerEx01
             csv.WriteRecords(infoData);
         }
 
-        public static void CreateBackups()
+        public static SettingsInfo CreateBackup()
         {
             SettingsInfo newSettingsInfo = new SettingsInfo();
+            newSettingsInfo.settingsID = Menu.GetAndUpdateSettingsID();
+            newSettingsInfo.nextSettingsID = Menu.mainFiles.nextSettingsID;
             newSettingsInfo.nextGameID = Menu.mainFiles.nextGameID;
             newSettingsInfo.nextFranchiseID = Menu.mainFiles.nextFranchiseID;
             newSettingsInfo.nextGenreID = Menu.mainFiles.nextGenreID;
@@ -87,17 +89,20 @@ namespace GameTrackerEx01
             UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, newSettingsInfo.backloggedGameFile);
 
             Menu.backupFiles.Add(newSettingsInfo);
-            Menu.mainFiles = newSettingsInfo;
 
             UpdateInfoFile<SettingsInfo>(Menu.backupFiles, Menu.settingsPath);
+
+            return newSettingsInfo;
         }
 
-        public static void CreateRefresh()
+        public static int CreateRefresh()
         {
             SettingsInfo newSettingsInfo = new SettingsInfo();
-            newSettingsInfo.nextGameID = 0;//Menu.mainFiles.nextGameID;
-            newSettingsInfo.nextFranchiseID = 0;//Menu.mainFiles.nextFranchiseID;
-            newSettingsInfo.nextGenreID = 0;//Menu.mainFiles.nextGenreID;
+            newSettingsInfo.settingsID = Menu.GetAndUpdateSettingsID();
+            newSettingsInfo.nextSettingsID = Menu.mainFiles.nextSettingsID;
+            newSettingsInfo.nextGameID = 0;
+            newSettingsInfo.nextFranchiseID = 0;
+            newSettingsInfo.nextGenreID = 0;
             newSettingsInfo.nextLogID = 0;
             newSettingsInfo.logEntryFile = $"saveFiles/logMessages_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.genreFile = $"saveFiles/gameGenres_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
@@ -108,20 +113,20 @@ namespace GameTrackerEx01
             newSettingsInfo.unpurchasedGameFile = $"saveFiles/unpurchasedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
             newSettingsInfo.backloggedGameFile = $"saveFiles/backloggedGames_{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv";
 
-
-            UpdateInfoFile<LogMessage>(Menu.existingLogMessages, newSettingsInfo.logEntryFile);
-            UpdateInfoFile<Genre>(Menu.existingGenres, newSettingsInfo.genreFile);
-            UpdateInfoFile<Franchise>(Menu.existingFranchises, newSettingsInfo.franchiseFile);
-            UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, newSettingsInfo.currentGameFile);
-            UpdateInfoFile<CompletedGame>(Menu.existingCompletedGames, newSettingsInfo.completedGameFile);
-            UpdateInfoFile<DroppedGame>(Menu.existingDroppedGames, newSettingsInfo.droppedGameFile);
-            UpdateInfoFile<UnpurchasedGame>(Menu.existingUnpurchasedGames, newSettingsInfo.unpurchasedGameFile);
-            UpdateInfoFile<BackloggedGame>(Menu.existingBackloggedGames, newSettingsInfo.backloggedGameFile);
-
             Menu.backupFiles.Add(newSettingsInfo);
-            Menu.mainFiles = newSettingsInfo;
 
-            UpdateInfoFile<SettingsInfo>(Menu.backupFiles, Menu.settingsPath);
+            UpdateInfoFile<LogMessage>(new List<LogMessage>(), newSettingsInfo.logEntryFile);
+            UpdateInfoFile<Genre>(new List<Genre>(), newSettingsInfo.genreFile);
+            UpdateInfoFile<Franchise>(new List<Franchise>(), newSettingsInfo.franchiseFile);
+            UpdateInfoFile<CurrentGame>(new List<CurrentGame>(), newSettingsInfo.currentGameFile);
+            UpdateInfoFile<CompletedGame>(new List<CompletedGame>(), newSettingsInfo.completedGameFile);
+            UpdateInfoFile<DroppedGame>(new List<DroppedGame>(), newSettingsInfo.droppedGameFile);
+            UpdateInfoFile<UnpurchasedGame>(new List<UnpurchasedGame>(), newSettingsInfo.unpurchasedGameFile);
+            UpdateInfoFile<BackloggedGame>(new List<BackloggedGame>(), newSettingsInfo.backloggedGameFile);
+
+            Menu.SetCurrentSettings(newSettingsInfo.settingsID);
+
+            return newSettingsInfo.settingsID;
         }
 
         
