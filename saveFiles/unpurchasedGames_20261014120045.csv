@@ -1,3 +1,4 @@
 gameID,gameName,avgGameLength,gameGenreIDs,deckPlayable,sessionGame,worthCompletionist,franchiseID,played,purchased,completed,playing,DLCIDs,excitementLevel,sequel,previousEntryID,fullPrice,lowestSalePrice,released,releaseDate
 20,Elden Ring: Nightreign,45,1;3;4;10;12;22;24;25;26;28,True,False,False,6,False,False,False,False,,4,True,19,54.95,41.21,True,01/01/0001
 31,Kena: Scars of Kosmora,20,3;11;23;24;25;15;12,False,False,True,9,False,False,False,False,,10,True,30,99.99,0,False,12/31/2027
+55,Over the Hill,15,13;17;19;37;48;49,True,True,True,-1,False,False,False,False,,9,False,-1,42.99,30.95,True,10/15/2026

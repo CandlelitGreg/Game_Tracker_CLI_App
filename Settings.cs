@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using CsvHelper.Configuration;
 
 namespace GameTrackerEx01
@@ -44,6 +45,14 @@ namespace GameTrackerEx01
             Map(m => m.deckPlayableMatch);
             Map(m => m.removeSessionLengthReq);
             Map(m => m.maxSimilarGameOutput);
+            Map(m => m.launchLandingPage);
+            Map(m => m.landingShowCurrent);
+            Map(m => m.landingShowNewRelease);
+            Map(m => m.landingShowRecentRecommended);
+            Map(m => m.autoDropCurrentAfterDuration);
+            Map(m => m.daysRequiredToDropCurrent);
+            Map(m => m.autoDropSession);
+            Map(m => m.autoDropNotificationDays);
         }
     }
 
@@ -51,7 +60,7 @@ namespace GameTrackerEx01
     {
         public RetrieveSettingsMap()
         {
-            Map(m => m.dateLastUsed);
+            Map(m => m.dateLastUsed).Convert(args => args.Value.activeSettingsID == args.Value.settingsID ? DateOnly.FromDateTime(DateTime.Now).ToString("MM/dd/yyyy") : args.Value.dateLastUsed.ToString("MM/dd/yyyy"));
             Map(m => m.settingsID);
             Map(m => m.fileName);
             Map(m => m.nextSettingsID);
@@ -89,6 +98,14 @@ namespace GameTrackerEx01
             Map(m => m.deckPlayableMatch);
             Map(m => m.removeSessionLengthReq);
             Map(m => m.maxSimilarGameOutput);
+            Map(m => m.launchLandingPage);
+            Map(m => m.landingShowCurrent);
+            Map(m => m.landingShowNewRelease);
+            Map(m => m.landingShowRecentRecommended);
+            Map(m => m.autoDropCurrentAfterDuration);
+            Map(m => m.daysRequiredToDropCurrent);
+            Map(m => m.autoDropSession);
+            Map(m => m.autoDropNotificationDays);
         }
     }
     public class SettingsInfo {
@@ -130,6 +147,14 @@ namespace GameTrackerEx01
         public bool deckPlayableMatch {get; set;} = false;
         public bool removeSessionLengthReq {get; set;} = false;
         public int maxSimilarGameOutput {get; set;} = 5;
+        public bool launchLandingPage {get; set;} = true;
+        public bool landingShowCurrent {get; set;} = true;
+        public bool landingShowNewRelease {get; set;} = true;
+        public bool landingShowRecentRecommended {get; set;} = true;
+        public bool autoDropCurrentAfterDuration {get; set;} = true;
+        public int daysRequiredToDropCurrent {get; set;} = 60;
+        public bool autoDropSession {get; set;} = false;
+        public int autoDropNotificationDays {get; set;} = 15;
 
         public void OpenSettings()
         {
@@ -663,7 +688,31 @@ namespace GameTrackerEx01
 
         public void ManageLandingPageSettings()
         {
-            
+            Console.WriteLine("\n\nWhat would you like to edit about your Landing Page?:\n");
+            Console.WriteLine($"1. Launch App to Landing Page:       {launchLandingPage}");
+            Console.WriteLine($"2. Show Current Games:               {landingShowCurrent}");
+            Console.WriteLine($"3. Show Recently Released Games:     {landingShowNewRelease}");
+            Console.WriteLine($"4. Show Recommended Games:           {landingShowRecentRecommended}");
+            Console.WriteLine("0. Exit");
+            int userInput = Format.GetSingleResponse(4, "What setting would you like to edit?");
+            switch (userInput)
+            {
+                case 1:
+                    launchLandingPage = launchLandingPage ? false : true;
+                    break;
+                case 2:
+                    landingShowCurrent = landingShowCurrent ? false : true;
+                    break;
+                case 3:
+                    landingShowNewRelease = landingShowNewRelease ? false : true;
+                    break;
+                case 4:
+                    landingShowRecentRecommended = landingShowRecentRecommended ? false : true;
+                    break;
+                case 0:
+                    return;
+            }
+            ManageLandingPageSettings();
         }
 
         public void ManageFormattingSettings()
@@ -673,12 +722,68 @@ namespace GameTrackerEx01
 
         public void ManageTypeChangeSettings()
         {
-            
+            Console.WriteLine("\n\nWhat would you like to edit about your Landing Page?:\n");
+            Console.WriteLine($"1. Automatically mark Current Games as Dropped after extended inactivity:       {autoDropCurrentAfterDuration}");
+            if (autoDropCurrentAfterDuration)
+            {
+                Console.WriteLine($"2. Days of Inactivity Required before marking Current Game as Dropped:          {daysRequiredToDropCurrent}");
+                Console.WriteLine($"3. Ignore Auto Drop functionality for Session Games:                            {!autoDropSession}");
+                Console.WriteLine($"4. Notify user 'x' days before dropping:                                        x = {autoDropNotificationDays}");
+            }
+            Console.WriteLine("0. Exit");
+            int userInput = autoDropCurrentAfterDuration ? Format.GetSingleResponse(4, "What setting would you like to edit?") : Format.GetSingleResponse(1, "What setting would you like to edit?");
+            switch (userInput)
+            {
+                case 1:
+                    autoDropCurrentAfterDuration = autoDropCurrentAfterDuration ? false : true;
+                    break;
+                case 2:
+                    Console.WriteLine("How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    int newDaysToDrop = Format.ConvertStringToInt(Console.ReadLine(), "How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    while (newDaysToDrop < 1)
+                    {
+                        Console.WriteLine($"Your input is too low, please input a positive integer");
+                        newDaysToDrop = Format.ConvertStringToInt(Console.ReadLine(), "How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    }
+                    while (newDaysToDrop < 15 && !Format.GetClosedAnswer($"{newDaysToDrop} is an extremely short time of inactivity.\nAre you sure you would like to drop a current game after not playing for {newDaysToDrop} days? (y/n)"))
+                    {
+                        Console.WriteLine("How many days of inactivity do you want to require before auto dropping currently playing games?");
+                        newDaysToDrop = Format.ConvertStringToInt(Console.ReadLine(), "How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    }
+                    daysRequiredToDropCurrent = newDaysToDrop;
+                    if (autoDropNotificationDays > daysRequiredToDropCurrent)
+                    {
+                        Console.WriteLine("Please change your Notification before Dropping settings to fit your new inactivity drop window");
+                        goto case 4;
+                    }
+                    break;
+                case 3:
+                    autoDropSession = autoDropSession ? false : true;
+                    break;
+                case 4:
+                    Console.WriteLine("How many days before dropping a game due to inactivity do you want to notify the user?");
+                    int newNotifDays = Format.ConvertStringToInt(Console.ReadLine(), "How many days before dropping a game due to inactivity do you want to notify the user?");
+                    while (newNotifDays < 0)
+                    {
+                        Console.WriteLine($"Your input is too low, please input a positive integer");
+                        newNotifDays = Format.ConvertStringToInt(Console.ReadLine(), "How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    }
+                    while (newNotifDays > daysRequiredToDropCurrent)
+                    {
+                        Console.WriteLine($"Your notification of dropping window must be smaller or equal to you inactivity before dropping duration.\nPlease input a number between 0 & {daysRequiredToDropCurrent}");
+                        newNotifDays = Format.ConvertStringToInt(Console.ReadLine(), "How many days before dropping a game due to inactivity do you want to notify the user?");
+                    }
+                    autoDropNotificationDays = newNotifDays;
+                    break;
+                case 0:
+                    return;
+            }
+            ManageTypeChangeSettings();
         }
 
-        public bool CalculateAvgLengthFilter(bool searchedisSession)
+        public bool CalculateAvgLengthFilter(bool searchedIsSession)
         {
-            if (removeSessionLengthReq && searchedisSession)
+            if (removeSessionLengthReq && searchedIsSession)
             {
                 return false;
             }

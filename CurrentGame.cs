@@ -291,6 +291,17 @@ namespace GameTrackerEx01
             }
             OpenReplay();
         }
+        public void AutoDropGame()
+        {
+            DroppedGame droppedVersion = new DroppedGame();
+            droppedVersion.GrabPlayedGameInfo(this);
+            droppedVersion.dateDropped = lastPlayed.AddDays(Menu.mainFiles.daysRequiredToDropCurrent);
+            droppedVersion.reasonDropped = $"Auto dropped by settings after not playing for {Menu.mainFiles.daysRequiredToDropCurrent} concurrent days";
+            droppedVersion.wouldRetry = true;
+            Menu.existingCurrentGames.RemoveAll(game => game.gameID == gameID);
+            droppedVersion.playing = false;
+            droppedVersion.played = true;
+        }
 
         public string DisplayCurrentGameInfo()
         {

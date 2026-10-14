@@ -525,6 +525,21 @@ namespace GameTrackerEx01
                     existingUnpurchasedGames[i].CheckIfReleased();
                 }
             }
+        }
+        public static void CheckCurrentGamesToDrop()
+        {
+            for (int i = 0; i < existingCurrentGames.Count; i++)
+            {
+                while (!mainFiles.autoDropSession && existingCurrentGames[i].sessionGame)
+                {
+                    i++;
+                }
+                if (existingCurrentGames[i].lastPlayed < DateOnly.FromDateTime(DateTime.Now.AddDays(-mainFiles.daysRequiredToDropCurrent)))
+                {
+                    existingCurrentGames[i].AutoDropGame();
+                }
+                
+            }
         }       
         public static void RecalculateAllGenreStats()
         {
