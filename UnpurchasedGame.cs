@@ -125,9 +125,12 @@ namespace GameTrackerEx01
 
         public void CheckIfReleased()
         {
-            if (releaseDate >= DateOnly.FromDateTime(DateTime.Now))
+            if (releaseDate <= DateOnly.FromDateTime(DateTime.Now))
             {
                 released = true;
+            } else
+            {
+                released = false;
             }
         }
 

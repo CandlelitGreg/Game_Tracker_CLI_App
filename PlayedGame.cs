@@ -143,12 +143,6 @@ namespace GameTrackerEx01
             Console.WriteLine($"What were your inital impressions and thoughts after your first play session of {gameName}?");
             initialImpressions = Format.ReplaceCommasInString(Console.ReadLine());
         }
-
-        public void AddRating()
-        {
-
-        }
-
         public VideoGame GetNextEntry()
         {
             if (nextEntryID != -1)

@@ -11,9 +11,8 @@ namespace GameTrackerEx01
         
         static void Main()
         {
-            // CSVHandler.CreateRefresh();
             Menu.GetStats();
-            HomePage();
+            LandingPage();
             CSVHandler.UpdateAllFiles();
             
         }
@@ -27,8 +26,9 @@ namespace GameTrackerEx01
             Console.WriteLine("4. View genres in tracker");
             Console.WriteLine("5. Get game recommendation");
             Console.WriteLine("6. Change Settings");
+            Console.WriteLine("7. View landing page");
             Console.WriteLine("0. Exit");
-            int userInput = Format.GetSingleResponse(6, "What action would you like to do?");
+            int userInput = Format.GetSingleResponse(7, "What action would you like to do?");
             switch (userInput)
             {
                 case 1:
@@ -49,6 +49,9 @@ namespace GameTrackerEx01
                 case 6:
                     Menu.mainFiles.OpenSettings();
                     break;
+                case 7:
+                    LandingPage();
+                    break;
                 case 0:
                     return;
             }
@@ -57,6 +60,101 @@ namespace GameTrackerEx01
                 HomePage();
             }
             return;
+        }
+
+        public static void LandingPage()
+        {
+            int n = 1;
+            //Currently playing quick select
+            List<CurrentGame> currentGames = Menu.existingCurrentGames.Where(game => !game.replay).ToList();
+            if (currentGames.Count > 0)
+            {
+                Console.WriteLine("\nCurrently Playing:");
+                for (int i = 0; i < currentGames.Count; i++)
+                {
+                    Console.WriteLine($"{n}. {currentGames[i].gameName}");
+                    n++;
+                }
+            }
+
+            //Recently released quick select
+            List<UnpurchasedGame> recentlyReleased = Menu.existingUnpurchasedGames.Where(game => game.released == true && game.releaseDate > DateOnly.FromDateTime(DateTime.Now.AddDays(-10))).ToList();
+            if (recentlyReleased.Count > 0)
+            {
+                Console.WriteLine("\nRecently Released:");
+                for (int i = 0; i < recentlyReleased.Count; i++)
+                {
+                    Console.WriteLine($"{n}. {recentlyReleased[i].gameName}");
+                    n++;
+                }
+            }
+
+            //Recently automatically dropped quick select
+
+
+            //Recently Played games
+            List<VideoGame> recentlyPlayed = [];
+            recentlyPlayed.AddRange(Menu.existingCurrentGames.Where(game => game.lastPlayed > DateOnly.FromDateTime(DateTime.Now.AddDays(-15))).ToList());
+            recentlyPlayed.AddRange(Menu.existingCompletedGames.Where(game => game.completionDate > DateOnly.FromDateTime(DateTime.Now.AddDays(-15))).ToList());
+            // if (recentlyPlayed.Count > 0)
+            // {
+            //     Console.WriteLine($"\nRecently Played:");
+            //     for (int i = 0; i < recentlyPlayed.Count; i++)
+            //     {
+            //         Console.WriteLine($"{n}. {recentlyPlayed[i].gameName}");
+            //         n++;
+            //     }
+            // }
+
+            //Recommendations based on recent activity
+            (int similarGameID, int numRelGames)[] recommendedFromRecents = [];
+            for (int i = 0; i < recentlyPlayed.Count; i++)
+            {
+                int[] similarGameIDs = recentlyPlayed[i].GetSimilarGames();
+                for (int q = 0; q < similarGameIDs.Length; q++)
+                {
+                    if (recommendedFromRecents.Any(game => game.similarGameID == similarGameIDs[q]))
+                    {
+                        recommendedFromRecents = recommendedFromRecents.Select(game => game.similarGameID == similarGameIDs[q] ? (game.similarGameID, game.numRelGames+1) : game).ToArray();
+                    } else
+                    {
+                        recommendedFromRecents = recommendedFromRecents.Append((similarGameIDs[q], 1)).ToArray();
+                    }
+                }
+            }
+            if (recommendedFromRecents.Length > 0)
+            {
+                recommendedFromRecents.Sort((x,y) => x.numRelGames.CompareTo(y.numRelGames));
+                Console.WriteLine("\nRecommended Games From Recently Played:");
+                for (int i = 0; i < recommendedFromRecents.Length; i++)
+                {
+                    Console.WriteLine($"{n}. {Menu.FindGameByID(recommendedFromRecents[i].similarGameID).gameName}");
+                    n++;
+                }
+            }
+            Console.WriteLine($"\n\nPress 0 to go to the Home Page, or select the game you would like to interect with above");
+            int userInput = Format.GetSingleResponse(n, "What action would you like to take?");
+            switch (userInput)
+            {
+                case 0:
+                    HomePage();
+                    break;
+                default:
+                    if (userInput <= currentGames.Count)
+                    {
+                        currentGames[userInput-1].OpenGameDetails();
+                    } 
+                    else if (userInput <= currentGames.Count - recentlyReleased.Count)
+                    {
+                        recentlyReleased[userInput-1-currentGames.Count].OpenGameDetails();
+                    } 
+                    else
+                    {
+                        Menu.FindGameByID(recommendedFromRecents[userInput-1-currentGames.Count-recentlyReleased.Count].similarGameID).OpenGameDetails();
+                    }
+                    break;
+            }
+            HomePage();
         }
 
         public static void ViewGames()

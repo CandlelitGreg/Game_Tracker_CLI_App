@@ -50,6 +50,7 @@ namespace GameTrackerEx01
             logData = GetLogData();
             playDuration = GetPlayDuration();
             Menu.existingLogMessages.Add(this);
+            Menu.FindGameByID(gameID).AddLogToList(logMessageID);
             SaveLogChanges();
             CheckLogInputs();
         }

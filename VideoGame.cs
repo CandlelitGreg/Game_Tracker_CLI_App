@@ -672,6 +672,35 @@ namespace GameTrackerEx01
             CSVHandler.UpdateAllFiles();
             Menu.FindGameByID(gameID).OpenGameDetails();
         }
+        public int[] GetSimilarGames()
+        {
+             (int similarGameID, int numRelGenres)[] similarGames = [];
+            //Cycle through each genre
+            for (int i = 0; i < gameGenreIDs.Length; i++)
+            {
+                //Cycle through each game attached to genre
+                for (int n = 0; n < Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs.Length; n++)
+                {
+                   
+                    //For each gameID, track how many times it shows up in the genre arrays
+                    if (similarGames.Any(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n]))
+                    {
+                        similarGames = similarGames.Select(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n] ? (game.similarGameID, game.numRelGenres+1) : game).ToArray();
+                    } else
+                    {
+                        similarGames = similarGames.Append((Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n], 1)).ToArray();
+                    }
+                }
+
+            }
+
+            //Sort final array by number of related genres
+            similarGames = similarGames.OrderByDescending(game => game.numRelGenres).ToArray();
+            (int similarGameID, int numRelGenres)[] similarFilteredGames = [];
+
+            similarFilteredGames = similarGames.Where(game => Menu.FindGameByID(game.similarGameID).ReadyToRecommend(Menu.mainFiles.filterWaitingForPrequelSetting, Menu.mainFiles.filterUnreleasedSetting, Menu.mainFiles.filterReplaysSetting, Menu.mainFiles.filterPlayedSetting, Menu.mainFiles.filterPlayingSetting, Menu.mainFiles.filterDroppedSetting, Menu.mainFiles.filterNotPurchasedSetting, Menu.mainFiles.CalculateDeckPlayableFilter(deckPlayable), Menu.mainFiles.CalculateAvgLengthFilter(sessionGame), Menu.mainFiles.CalculateAvgLengthBase(avgGameLength), Menu.mainFiles.CalculateAvgLengthDeviation(avgGameLength), Menu.mainFiles.requiresCertainExcitementSetting, Menu.mainFiles.requiredExcitementLevelOrRatingSetting, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).onlySession, Menu.mainFiles.CalculateSessionGameStatus(sessionGame).ignoreSession) == true).ToArray();
+            return similarFilteredGames.Where(game => game.similarGameID != gameID && game.numRelGenres > similarGames[0].numRelGenres - 3).ToArray().Select(t => t.similarGameID).ToArray();
+        }
         public void ViewSimilarGames()
         {
             //Collect attachedGameID arrays for each gameGenre
@@ -687,7 +716,6 @@ namespace GameTrackerEx01
                     if (similarGames.Any(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n]))
                     {
                         similarGames = similarGames.Select(game => game.similarGameID == Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n] ? (game.similarGameID, game.numRelGenres+1) : game).ToArray();
-                        Console.WriteLine($"Recurring game detected");
                     } else
                     {
                         similarGames = similarGames.Append((Menu.existingGenres[Menu.FindGenre(gameGenreIDs[i])].attachedGameIDs[n], 1)).ToArray();
@@ -707,13 +735,13 @@ namespace GameTrackerEx01
             for (int i = 0; i < similarFilteredGames.Length; i++)
             {
                 Console.WriteLine($"\n{i+1}. {Menu.FindGameByID(similarFilteredGames[i].similarGameID).gameName}");
-                if (i == 4)
+                if (i == Menu.mainFiles.maxSimilarGameOutput-1)
                 {
                     i = similarFilteredGames.Length;
                 }
             }
             Console.WriteLine("\n0. Go back");
-            int userInput = similarFilteredGames.Length > 5 ? Format.GetSingleResponse(5, "Please input the index of the game you would like to interact with, or press 0 to go back") : Format.GetSingleResponse(similarFilteredGames.Length, "Please input the index of the game you would like to interact with, or press 0 to go back");
+            int userInput = similarFilteredGames.Length > Menu.mainFiles.maxSimilarGameOutput ? Format.GetSingleResponse(Menu.mainFiles.maxSimilarGameOutput, "Please input the index of the game you would like to interact with, or press 0 to go back") : Format.GetSingleResponse(similarFilteredGames.Length, "Please input the index of the game you would like to interact with, or press 0 to go back");
             switch (userInput)
             {
                 case 0:
@@ -930,7 +958,6 @@ namespace GameTrackerEx01
         {
             LogMessage newLog = new LogMessage();
             newLog.CreateLog(gameID);
-            AddLogToList(newLog.logMessageID);
         }
         public string RetrieveLogLocation(int logMessageID)
         {

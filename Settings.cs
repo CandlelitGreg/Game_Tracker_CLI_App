@@ -43,6 +43,7 @@ namespace GameTrackerEx01
             Map(m => m.sessionGameRequired);
             Map(m => m.deckPlayableMatch);
             Map(m => m.removeSessionLengthReq);
+            Map(m => m.maxSimilarGameOutput);
         }
     }
 
@@ -87,6 +88,7 @@ namespace GameTrackerEx01
             Map(m => m.sessionGameRequired);
             Map(m => m.deckPlayableMatch);
             Map(m => m.removeSessionLengthReq);
+            Map(m => m.maxSimilarGameOutput);
         }
     }
     public class SettingsInfo {
@@ -127,6 +129,7 @@ namespace GameTrackerEx01
         public bool sessionGameRequired {get; set;} = false;
         public bool deckPlayableMatch {get; set;} = false;
         public bool removeSessionLengthReq {get; set;} = false;
+        public int maxSimilarGameOutput {get; set;} = 5;
 
         public void OpenSettings()
         {
@@ -533,7 +536,18 @@ namespace GameTrackerEx01
 
         public void AlterMaxSimilarGameCount()
         {
-            
+            Console.WriteLine($"As per your settings, searching for similar games will only output up to {maxSimilarGameOutput} results\nHow many results would you like to show?");
+            int newLimit = Format.ConvertStringToInt(Console.ReadLine(), $"What is the new limit for similar game recomendations you would like to receive?");
+            while (newLimit < 1)
+            {
+                Console.WriteLine($"{newLimit} less than 1. Please select a positive full number");
+                newLimit = Format.ConvertStringToInt(Console.ReadLine(), $"What is the new limit for similar game recomendations you would like to receive?");
+            }
+            if (Format.GetClosedAnswer($"Are you sure you want to update the limit of recommended similar games from {maxSimilarGameOutput} to {newLimit}? (y/n)"))
+            {
+                maxSimilarGameOutput = newLimit;
+            }
+            SaveSettings();
         }
 
         public void ManageBackupsSettings()
