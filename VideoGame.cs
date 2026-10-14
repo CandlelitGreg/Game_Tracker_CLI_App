@@ -46,6 +46,8 @@ namespace GameTrackerEx01
         public bool purchased {get; set;}
         public bool completed {get; set;}
         public bool playing {get; set;}
+        public bool replaying {get; set;} = false;
+        public bool replay {get; set;} = false;
 
         public int[] DLCIDs {get;set;} = [];
 
@@ -226,7 +228,15 @@ namespace GameTrackerEx01
             switch (true)
             {
                 case var _ when completed:
-                    Menu.FindDetailedGameByID<CompletedGame>(gameID).hoursPlayed += addedHrs;
+                    if (Menu.FindDetailedGameByID<CurrentGame>(gameID) != null && Menu.FindDetailedGameByID<CurrentGame>(gameID).replay)
+                    {
+                        Menu.FindDetailedGameByID<CompletedGame>(Menu.FindDetailedGameByID<CurrentGame>(gameID).originalPlaythroughID).hoursPlayed += addedHrs;
+                        Menu.FindDetailedGameByID<CurrentGame>(gameID).hoursPlayed += addedHrs;
+                    }
+                    else
+                    {
+                        Menu.FindDetailedGameByID<CompletedGame>(gameID).hoursPlayed += addedHrs;
+                    }
                     break;
                 case var _ when playing:
                     Menu.FindDetailedGameByID<CurrentGame>(gameID).hoursPlayed += addedHrs;
@@ -548,9 +558,13 @@ namespace GameTrackerEx01
                     Console.WriteLine("5. Log Game as Dropped");
                     Console.WriteLine("6. Log Game as Completed");
                 }
-                if (completed)
+                if (completed && !replaying)
                 {
-                    Console.WriteLine("5. Log Replay");
+                    Console.WriteLine("5. Log a Started Replay");
+                } 
+                else if (replaying)
+                {
+                    Console.WriteLine("5. Manage Replays");
                 }
                 if (!playing && !completed)
                 {
@@ -625,8 +639,11 @@ namespace GameTrackerEx01
                             case var _ when playing:
                                 Menu.FindDetailedGameByID<CurrentGame>(gameID).DropGame<CurrentGame>(Menu.FindDetailedGameByID<CurrentGame>(gameID));
                                 break;
-                            case var _ when completed:
+                            case var _ when completed && !replaying:
                                 Menu.FindDetailedGameByID<CompletedGame>(gameID).InitiateReplay();
+                                break;
+                            case var _ when completed && replaying:
+                                Menu.FindDetailedGameByID<CompletedGame>(gameID).ManageReplays();
                                 break;
                             case var _ when !playing && !completed:
                                 Menu.FindDetailedGameByID<DroppedGame>(gameID).LogRetry();
@@ -992,6 +1009,9 @@ namespace GameTrackerEx01
             UpdateAllGenreStats();
             switch (true)
             {
+                case var _ when replay:
+                    Menu.FindDetailedGameByID<CurrentGame>(gameID).SaveGameInfo();
+                    break;
                 case var _ when completed:
                     Menu.FindDetailedGameByID<CompletedGame>(gameID).SaveGameInfo();
                     break;

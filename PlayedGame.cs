@@ -23,26 +23,9 @@ namespace GameTrackerEx01
             Console.WriteLine($"Please input the approximate number of hours you have spent with {gameName}");
             hoursPlayed = Format.ConvertStringToFloat(Console.ReadLine(), $"Please input the approximate play time you have spent with {gameName}");
 
-            //Get current rating
-            // Console.WriteLine($"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            // rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            // while (rating > 10 || rating < 1)
-            // {
-            //     Console.WriteLine($"{rating} is outside of the 1-10 range. Please select a rating within 1 and 10");
-            //     rating = Format.ConvertStringToInt(Console.ReadLine(), $"What is your current rating of {gameName} from 1-10? (1: Horrible, 10: Amazing)");
-            // }
             EditRating();
 
-            //Get initial excitement level
-            // Console.WriteLine($"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            // initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            // while (initialExcitementLevel > 10 || initialExcitementLevel < 1)
-            // {
-            //     Console.WriteLine($"{initialExcitementLevel} is outside of the 1-10 range. Please select a rating within 1 and 10");
-            //     initialExcitementLevel = Format.ConvertStringToInt(Console.ReadLine(), $"What was your initial excitement level from 1-10 prior to playing {gameName}? (1: Horrible, 10: Amazing)");
-            // }
             EditInitialExcitement();
-
 
             //Get initial impressions
             AddInitialImpressions();
@@ -181,6 +164,10 @@ namespace GameTrackerEx01
             float newHours = Format.ConvertStringToFloat(Console.ReadLine(), $"What is your current playtime on {gameName}?");
             if (Format.GetClosedAnswer($"Are you sure you want to update your hours played from {hoursPlayed} to {newHours} for {gameName}? (y/n)"))
             {
+                if (replay)
+                {
+                    Menu.FindDetailedGameByID<CompletedGame>(Menu.FindDetailedGameByID<CurrentGame>(gameID).originalPlaythroughID).hoursPlayed += newHours - hoursPlayed;
+                }
                 hoursPlayed = newHours;
             }
             SaveGameUpdates();

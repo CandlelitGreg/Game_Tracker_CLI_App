@@ -79,6 +79,8 @@ namespace GameTrackerEx01
             CheckAllReleaseDates();
             existingBackloggedGames = DownloadInfo<BackloggedGame>(mainFiles.backloggedGameFile);
             var allGames = GetAllVideoGames();
+            existingVideoGames.Clear();
+            existingReplays.Clear();
             existingVideoGames.AddRange(allGames.vgs);
             existingReplays.AddRange(allGames.replays);
             SortGameLists();

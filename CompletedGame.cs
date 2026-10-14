@@ -81,7 +81,6 @@ namespace GameTrackerEx01
         public string review {get; set;}
         public bool wantToPlayAgain {get; set;}
         public bool completionistComplete {get; set;} = false;
-        public bool replaying {get; set;}
         public int[] replayID {get; set;} = []; //Treat replay as a second gameID but hidden to user, only used to access replay specific information
         
         
@@ -124,14 +123,46 @@ namespace GameTrackerEx01
             replayVersion.gameID = Menu.GetAndUpdateNextGameID();
             replayVersion.originalPlaythroughID = gameID;
             replayVersion.replay = true;
+            replayVersion.hoursPlayed = 0;
 
 
             //Assign new GameID to replayId array
             replayID = replayID.Append(replayVersion.gameID).ToArray();
+            replaying = true;
+
+            //Get first played date
+            replayVersion.firstPlayedDate = DateOnly.FromDateTime(Format.GetDateValue($"date you started your replay of {gameName} in format dd/MM/yyyy"));
+            replayVersion.lastPlayed = replayVersion.firstPlayedDate;
 
             //Save Changes
             Menu.existingCurrentGames.Add(replayVersion);
+            Menu.existingReplays.Add(replayVersion);
+
+            if (Format.GetClosedAnswer($"Would you like to attach a log entry to the start of your replay of {gameName}? (y/n)"))
+            {
+                AddLog();
+            }
             CSVHandler.UpdateInfoFile<CurrentGame>(Menu.existingCurrentGames, Menu.mainFiles.currentGameFile);
+        }
+        public void ManageReplays()
+        {
+            Console.WriteLine($"What replay of {gameName} would you like to interact with?\n");
+            for (int i = 0; i < replayID.Length; i++)
+            {
+                DateOnly displayDate = Menu.FindDetailedGameByID<CurrentGame>(replayID[i]).lastPlayed == new DateOnly() ? Menu.FindDetailedGameByID<CurrentGame>(replayID[i]).firstPlayedDate : Menu.FindDetailedGameByID<CurrentGame>(replayID[i]).lastPlayed ;
+                Console.WriteLine($"{i+1}. Edit Replay #{i+1} - Last played on {displayDate.ToString("dd/MM/yyyy")}");
+            }
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(replayID.Length, $"What replay of {gameName} would you like to interact with?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindDetailedGameByID<CurrentGame>(replayID[userInput-1]).OpenReplay();
+                    break;
+            }
+            ManageReplays();
         }
 
         public string WriteReview()

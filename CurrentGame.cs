@@ -32,6 +32,7 @@ namespace GameTrackerEx01
             Map(m => m.replay);
             Map(m => m.originalPlaythroughID);
             Map(m => m.previouslyDropped);
+            Map(m => m.previouslyDroppedReason);
         }
     }
 
@@ -65,6 +66,7 @@ namespace GameTrackerEx01
             Map(m => m.replay);
             Map(m => m.originalPlaythroughID);
             Map(m => m.previouslyDropped);
+            Map(m => m.previouslyDroppedReason);
         }
     }
 
@@ -72,7 +74,6 @@ namespace GameTrackerEx01
     {
         public DateOnly lastPlayed {get; set;}
         public DateOnly firstPlayedDate {get; set;}
-        public bool replay {get; set;}
         public int originalPlaythroughID {get; set;}
         public bool previouslyDropped {get; set;}
         public string previouslyDroppedReason {get; set;}
@@ -121,12 +122,12 @@ namespace GameTrackerEx01
 
         public void AlterStartDate()
         {
-            if (firstPlayedDate != null)
+            if (firstPlayedDate != new DateOnly())
             {
                 Console.WriteLine($"The currently recorded start date for {gameName} is {firstPlayedDate.ToString("dd/MM/yyyy")}");
             }
             DateOnly newStart = DateOnly.FromDateTime(Format.GetDateValue($"new date you first played {gameName} in format dd/MM/yyyy"));
-            if (firstPlayedDate != null && !Format.GetClosedAnswer($"Are you sure you want to change the first date you played {gameName} to be {newStart.ToString("dd/MM/yyyy")} instead of {firstPlayedDate}? (y/n)"))
+            if (firstPlayedDate != new DateOnly() && !Format.GetClosedAnswer($"Are you sure you want to change the first date you played {gameName} to be {newStart.ToString("dd/MM/yyyy")} instead of {firstPlayedDate}? (y/n)"))
             {
                 return;
             }
@@ -249,6 +250,46 @@ namespace GameTrackerEx01
                     Console.WriteLine("This functionality is not yet implemented");
                     break;
             }
+        }
+
+        public void OpenReplay()
+        {
+            Console.WriteLine($"What would you like to edit about this replay of {gameName}?\n");
+            Console.WriteLine("1. Edit hours played");
+            Console.WriteLine("2. Edit log entries");
+            Console.WriteLine("3. Edit main play device");
+            Console.WriteLine("4. Edit modded playthrough status");
+            Console.WriteLine("5. Edit gaming dates");
+            Console.WriteLine("6. View replay details");
+            Console.WriteLine("0. Go back");
+            int userInput = Format.GetSingleResponse(6, $"What would you like to edit about {gameName}?");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                case 1:
+                    EditHoursPlayed();
+                    break;
+                case 2:
+                    EditLogs();
+                    break;
+                case 3:
+                    ChangePlayDevice();
+                    break;
+                case 4:
+                    ChangeModdedStatus();
+                    break;
+                case 5:
+                    EditPlayedDates();
+                    break;
+                case 6:
+                    DisplayCurrentGameInfo();
+                    break;
+                default:
+                    Console.WriteLine("This functionality is not yet implemented");
+                    break;
+            }
+            OpenReplay();
         }
 
         public string DisplayCurrentGameInfo()
