@@ -133,23 +133,10 @@ namespace GameTrackerEx01
             return -1;
         }
 
-        public void AddToPlayTime(float minutesPlayed)
-        {
-            hoursPlayed += minutesPlayed / 60;
-        }
-
         public void AddInitialImpressions()
         {
             Console.WriteLine($"What were your inital impressions and thoughts after your first play session of {gameName}?");
             initialImpressions = Format.ReplaceCommasInString(Console.ReadLine());
-        }
-        public VideoGame GetNextEntry()
-        {
-            if (nextEntryID != -1)
-            {
-                return Menu.FindGameByID(nextEntryID);
-            }
-            return null;
         }
 
         public void EditHoursPlayed()
@@ -366,8 +353,6 @@ namespace GameTrackerEx01
             droppedVersion.played = true;
         }
 
-
-
         public string ReadInitialImpressionsPreview()
         {
             string abreviatedImpressions = Format.ReturnCommasToString(initialImpressions);
@@ -399,7 +384,7 @@ namespace GameTrackerEx01
                     playedGameInfo += $"        Log Play Duration:    {currentLog.playDuration}\n";
                     playedGameInfo += $"        Log Entry:            {currentLog.ReadLogPreview()}\n";
                 }
-                Console.WriteLine("\n");
+                playedGameInfo += "\n";
             }
             if (!string.IsNullOrWhiteSpace(mainPlayDevice))
             {

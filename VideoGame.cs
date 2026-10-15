@@ -51,7 +51,10 @@ namespace GameTrackerEx01
 
         public int[] DLCIDs {get;set;} = [];
 
-
+        /// <summary>
+        /// Creates a VideoGame object and retrieves gameID, gameName, and gameFranchise
+        /// Finishes by calling GetGameInfo() to retrieve remaining information
+        /// </summary>
         public void AddGame()
         {
             //Assign the gameID
@@ -81,6 +84,9 @@ namespace GameTrackerEx01
 
             GetGameInfo();
         }
+       /// <summary>
+       /// Retrieves or Creates franchise the game is a part of and calls Menu's AddGameToFranchise() to connect the two objects
+       /// </summary>
         public void AddToFranchise()
         {
             Console.WriteLine($"Please select the franchise {gameName} is a part of:");
@@ -105,6 +111,11 @@ namespace GameTrackerEx01
                 Menu.AddGameToFranchise(gameID, franchiseID);
             }
         }
+        /// <summary>
+        /// Attaches a gameID if needed and retrieves deckPlayable, avgGameLength, sessionGame, completionist stats
+        /// Collects and creates related genres
+        /// Retrievs play status and creates a relevant PlayedGame/UnplayedGame object, calling their GetPlayed/UnplayedInfo func
+        /// </summary>
         public void GetGameInfo()
         {
             if (gameID == -1)
@@ -197,6 +208,12 @@ namespace GameTrackerEx01
             
 
         }
+        /// <summary>
+        /// Adds gameID, gameName, and franchiseID, from prequel/sequel that called the func
+        /// Calls Menu's AddGameToFranchise() to attach franchise & game, the calls GetGameInfo() to retrieve relevant info
+        /// </summary>
+        /// <param name="gameTitle">string var detailing game's name</param>
+        /// <param name="existingFranchiseID">int var detailing associated franchise's ID</param>
         public void AddGameFromFranchise(string gameTitle, int existingFranchiseID)
         {
             //Add the game sequel or prequel to the game automatically
@@ -206,6 +223,9 @@ namespace GameTrackerEx01
             Menu.AddGameToFranchise(gameID, franchiseID);
             GetGameInfo();
         }
+        /// <summary>
+        /// Retrieves the new game length input and updates the object var if confirmed by user
+        /// </summary>
         public void UpdateGameLength()
         {
             float newGameLength = 0;
@@ -218,6 +238,10 @@ namespace GameTrackerEx01
                 SaveGameUpdates();
             }
         }
+        /// <summary>
+        /// Adds inputed parameter addedHrs to grandchild object var of hoursPlayed - used in logs
+        /// </summary>
+        /// <param name="addedHrs">float var detailing number of hours to add to hoursPlayed</param>
         public void AddPlayTime(float addedHrs)
         {
             if (!played)
@@ -246,6 +270,9 @@ namespace GameTrackerEx01
                     break;
             }
         }
+        /// <summary>
+        /// Retrieves the new game title input and updates the object var if confirmed by user
+        /// </summary>
         public void EditTitle()
         {
             string newName = "";
@@ -259,6 +286,9 @@ namespace GameTrackerEx01
                 SaveGameUpdates();
             }
         }
+        /// <summary>
+        /// Swaps the game deck playable status if confirmed by user
+        /// </summary>
         public void EditDeckStatus()
         {
             if (deckPlayable)
@@ -276,6 +306,9 @@ namespace GameTrackerEx01
             }
             SaveGameUpdates();
         }
+        /// <summary>
+        /// Retrieves the game genre inputs and creates/attached each genre to the game and vice versa
+        /// </summary>
         public void AddGenres()
         {
             if (Menu.existingGenres.Count - gameGenreIDs.Length < 1)
@@ -350,6 +383,9 @@ namespace GameTrackerEx01
             }
 
         }
+        /// <summary>
+        /// Retrieves genre inputs for removal and unassociates the connection from both objects
+        /// </summary>
         public void RemoveGenres()
         {
 
@@ -391,6 +427,10 @@ namespace GameTrackerEx01
                 gameGenreIDs = gameGenreIDs.Where(ID => ID != gameGenreIDs[removedGenres[i] - 1]).ToArray();
             }
         }
+        /// <summary>
+        /// Detaches sequel/prequel connection from both game objects
+        /// </summary>
+        /// <param name="sequelID">int var detailing gameID of sequl/prequel game associated</param>
         public void RemoveFromSequel(int sequelID)
         {
             if (played)
@@ -592,6 +632,10 @@ namespace GameTrackerEx01
                     return;
                 case 1:
                     Console.WriteLine(DisplayGameDetails());
+                    if (played && int.Parse(RetrieveLogLocation(-1)) > 0 && Format.GetClosedAnswer("Would you like to look through your logs in more detail? (y/n)"))
+                    {
+                        OpenLogs();
+                    }
                     break;
                 case 2:
                     if (played)
@@ -1007,6 +1051,43 @@ namespace GameTrackerEx01
                     Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs.Append(logID).ToArray();
                     break;
             }
+        }
+        public void OpenLogs()
+        {
+            Console.WriteLine($"Please find attached below all of your log entries for {gameName}");
+            int[] logMessageIDs = [];
+            switch (true)
+            {
+                case var _ when replay || playing:
+                    logMessageIDs = Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs;
+                    break;
+                case var _ when completed:
+                    logMessageIDs = Menu.FindDetailedGameByID<CompletedGame>(gameID).logMessageIDs;
+                    break;
+                case var _ when !playing && !completed:
+                    logMessageIDs = Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs;
+                    break;
+            }
+            string logInfo = "";
+            for (int i = 0; i < logMessageIDs.Length; i++)
+            {
+                logInfo += $"{i + 1}:\n";
+                LogMessage currentLog = Menu.FindLog(logMessageIDs[i]);
+                logInfo += $"        Log Date:             {currentLog.logDate}\n";
+                logInfo += $"        Log Play Duration:    {currentLog.playDuration}\n";
+                logInfo += $"        Log Entry:            {currentLog.ReadLogPreview()}\n";
+            }
+            Console.WriteLine($"{logInfo}\nPlease input the number of the log you would like to view");
+            int userInput = Format.GetSingleResponse(logMessageIDs.Length, "Please input the number of the log you would like to view, or press 0 to go back");
+            switch (userInput)
+            {
+                case 0:
+                    return;
+                default:
+                    Menu.FindLog(logMessageIDs[userInput-1]).CheckLogInputs();
+                    break;
+            }
+              
         }
         public void UpdateAllGenreStats()
         {

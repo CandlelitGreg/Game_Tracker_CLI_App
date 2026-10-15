@@ -162,10 +162,9 @@ namespace GameTrackerEx01
             Console.WriteLine("1. Change similar game filters");
             Console.WriteLine("2. Manage backups");
             Console.WriteLine("3. Manage landing page");
-            Console.WriteLine("4. Manage formatting preferences");
-            Console.WriteLine("5. Manage automatic game type changes");
+            Console.WriteLine("4. Manage automatic game type changes");
             Console.WriteLine("0. Exit");
-            int userInput = Format.GetSingleResponse(5, "What action would you like to take?");
+            int userInput = Format.GetSingleResponse(4, "What action would you like to take?");
             switch (userInput)
             {
                 case 1:
@@ -178,9 +177,6 @@ namespace GameTrackerEx01
                     ManageLandingPageSettings();
                     break;
                 case 4:
-                    ManageFormattingSettings();
-                    break;
-                case 5:
                     ManageTypeChangeSettings();
                     break;
                 case 0:
@@ -713,11 +709,6 @@ namespace GameTrackerEx01
                     return;
             }
             ManageLandingPageSettings();
-        }
-
-        public void ManageFormattingSettings()
-        {
-            
         }
 
         public void ManageTypeChangeSettings()

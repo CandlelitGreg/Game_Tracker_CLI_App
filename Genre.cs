@@ -349,7 +349,7 @@ namespace GameTrackerEx01
             for (int i = 0; i < attachedGameIDs.Length; i++)
             {
                 VideoGame nextGame = Menu.FindGameByID(attachedGameIDs[i]);
-                if (nextGame == null)
+                if (nextGame == null || nextGame.replay)
                 {
                     RemoveGameFromGenre(attachedGameIDs[i]);
                     SaveGenreChanges();

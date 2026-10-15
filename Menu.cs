@@ -41,6 +41,7 @@ namespace GameTrackerEx01
             existingUnpurchasedGames = DownloadInfo<UnpurchasedGame>(mainFiles.unpurchasedGameFile);
             CheckAllReleaseDates();
             existingBackloggedGames = DownloadInfo<BackloggedGame>(mainFiles.backloggedGameFile);
+            CheckCurrentGamesToDrop();
             var allGames = GetAllVideoGames();
             existingVideoGames.AddRange(allGames.vgs);
             existingReplays.AddRange(allGames.replays);
@@ -538,7 +539,7 @@ namespace GameTrackerEx01
                 {
                     existingCurrentGames[i].AutoDropGame();
                 }
-                
+
             }
         }       
         public static void RecalculateAllGenreStats()
@@ -554,10 +555,6 @@ namespace GameTrackerEx01
             CSVHandler.UpdateInfoFile<SettingsInfo>(backupFiles, settingsPath);
             mainFiles = FindSettingsFile(settingsID);
             ImportStats();
-        }
-        public static void ViewBackups()
-        {
-
-        }        
+        }     
     }
 }

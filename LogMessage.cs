@@ -101,10 +101,6 @@ namespace GameTrackerEx01
             Console.WriteLine($"Log Play Duration:        {playDuration}hrs");
             Console.WriteLine($"Log Entry Text:\n ---   ---   ---\n{logData}\n ---   ---   ---");
         }
-        public string ReadLog()
-        {
-            return Format.ReturnCommasToString(logData);
-        }
         public string ReadLogPreview()
         {
             string returnLog = Format.ReturnCommasToString(logData);

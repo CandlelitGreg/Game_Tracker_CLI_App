@@ -241,11 +241,6 @@ namespace GameTrackerEx01
             newGame.AddGame();
         }
 
-        public static void SearchGames()
-        {
-            
-        }
-
         public static void GetGeneralGameRecommendation()
         {
             //Get 2 from each top 3 genres, and 2 from each of 3 most recently played games
@@ -517,12 +512,6 @@ namespace GameTrackerEx01
             OpenGameRecommender();
         }
 
-
-
-        //SaveDataToCSVs as if DB, normaised via .cs file layout
-        //Add Primary key to initial csv file, and foreign key to each other file
-        //Have any commas in data be replaced by "^&^" value
-        //Have output of list be organisable via playtime, excitement level, admiration, purchase, deckPlayable, etc.
     }
     
 }
