@@ -16,3 +16,5 @@ gameID,gameName,avgGameLength,gameGenreIDs,deckPlayable,sessionGame,worthComplet
 46,Metro 2033,9,0;2;3;8;23;43,True,False,False,15,False,True,False,False,,7,False,-1,01/01/2023
 47,Metro Exodus,16,0;2;3;8;23;43,True,False,True,15,False,True,False,False,,9,True,48,01/01/2024
 48,Metro Last Light,10,0;2;3;8;23;43,True,False,False,15,False,True,False,False,,7,True,46,01/01/2023
+57,Dying Light,24,0;2;3;4;5;6;8;23;27,True,False,True,16,False,True,False,False,,9,False,-1,01/01/2020
+58,Guardians of the Galaxy,17.5,3;9;21;23;30;35;36;40;42,True,False,False,-1,False,True,False,False,,8,False,-1,01/01/2024

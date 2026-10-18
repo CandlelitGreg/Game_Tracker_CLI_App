@@ -99,7 +99,7 @@ namespace GameTrackerEx01
             Console.WriteLine($"Displaying Data from Log Entry {Menu.FindGameByID(logGameID).RetrieveLogLocation(logMessageID)} for {Menu.FindGameByID(logGameID).gameName}\n");
             Console.WriteLine($"Log entry Date:           {logDate}");
             Console.WriteLine($"Log Play Duration:        {playDuration}hrs");
-            Console.WriteLine($"Log Entry Text:\n ---   ---   ---\n{logData}\n ---   ---   ---");
+            Console.WriteLine($"Log Entry Text:\n ---   ---   ---\n{Format.ReturnCommasToString(logData)}\n ---   ---   ---");
         }
         public string ReadLogPreview()
         {

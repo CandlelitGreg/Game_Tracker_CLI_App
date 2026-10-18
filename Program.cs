@@ -153,6 +153,10 @@ namespace GameTrackerEx01
                     {
                         n++;
                         Console.WriteLine($"{n}. {Menu.FindGameByID(recommendedFromRecents[i].similarGameID).gameName}");
+                        if (i >= Menu.mainFiles.maxLoadingRecommend - 1)
+                        {
+                            i = recommendedFromRecents.Length;
+                        }
                     }
                 } else
                 {

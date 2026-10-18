@@ -155,6 +155,7 @@ namespace GameTrackerEx01
         public int daysRequiredToDropCurrent {get; set;} = 60;
         public bool autoDropSession {get; set;} = false;
         public int autoDropNotificationDays {get; set;} = 15;
+        public int maxLoadingRecommend {get; set;} = 5;
 
         public void OpenSettings()
         {
@@ -689,8 +690,9 @@ namespace GameTrackerEx01
             Console.WriteLine($"2. Show Current Games:               {landingShowCurrent}");
             Console.WriteLine($"3. Show Recently Released Games:     {landingShowNewRelease}");
             Console.WriteLine($"4. Show Recommended Games:           {landingShowRecentRecommended}");
+            Console.WriteLine($"5. Max Recommended Titles:           {maxLoadingRecommend}");
             Console.WriteLine("0. Exit");
-            int userInput = Format.GetSingleResponse(4, "What setting would you like to edit?");
+            int userInput = landingShowRecentRecommended ? Format.GetSingleResponse(5, "What setting would you like to edit?") : Format.GetSingleResponse(4, "What setting would you like to edit?");
             switch (userInput)
             {
                 case 1:
@@ -704,6 +706,19 @@ namespace GameTrackerEx01
                     break;
                 case 4:
                     landingShowRecentRecommended = landingShowRecentRecommended ? false : true;
+                    break;
+                case 5:
+                    Console.WriteLine("How many games would you like to have recommended to you on your Landing Page??");
+                    int newMaxLoadingRec = Format.ConvertStringToInt(Console.ReadLine(), "How many days before dropping a game due to inactivity do you want to notify the user?");
+                    while (newMaxLoadingRec < 1)
+                    {
+                        Console.WriteLine($"Your input is too low, please input a positive integer");
+                        newMaxLoadingRec = Format.ConvertStringToInt(Console.ReadLine(), "How many days of inactivity do you want to require before auto dropping currently playing games?");
+                    }
+                    if (Format.GetClosedAnswer($"Are you sure you would like to edit the maximum number of recommended games on your loading screen from {maxLoadingRecommend} to {newMaxLoadingRec}? (y/n)"))
+                    {
+                        autoDropNotificationDays = newMaxLoadingRec;
+                    }
                     break;
                 case 0:
                     return;

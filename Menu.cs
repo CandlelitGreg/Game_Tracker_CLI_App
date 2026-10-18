@@ -531,11 +531,11 @@ namespace GameTrackerEx01
         {
             for (int i = 0; i < existingCurrentGames.Count; i++)
             {
-                while (!mainFiles.autoDropSession && existingCurrentGames[i].sessionGame)
+                while (i < existingCurrentGames.Count && !mainFiles.autoDropSession && existingCurrentGames[i].sessionGame)
                 {
                     i++;
                 }
-                if (existingCurrentGames[i].lastPlayed < DateOnly.FromDateTime(DateTime.Now.AddDays(-mainFiles.daysRequiredToDropCurrent)))
+                if (i < existingCurrentGames.Count && existingCurrentGames[i].lastPlayed < DateOnly.FromDateTime(DateTime.Now.AddDays(-mainFiles.daysRequiredToDropCurrent)))
                 {
                     existingCurrentGames[i].AutoDropGame();
                 }

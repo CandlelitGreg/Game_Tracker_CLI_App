@@ -553,6 +553,23 @@ namespace GameTrackerEx01
                     break;
             }
         }
+        public void EditSessionStatus()
+        {
+            if (sessionGame)
+            {
+                if (Format.GetClosedAnswer($"Are you sure you would like to update {gameName} to no longer be tagged as a session game? (y/n)"))
+                {
+                    sessionGame = false;
+                }
+            } else
+            {
+                if (Format.GetClosedAnswer($"Are you sure you would like to update {gameName} to be tagged as a session game? (y/n)"))
+                {
+                    sessionGame = true;
+                }
+            }
+            SaveGameUpdates();
+        }
         public void EditGameDetails()
         {
             Console.WriteLine($"What would you like to edit about {gameName}?\n");
@@ -560,9 +577,10 @@ namespace GameTrackerEx01
             Console.WriteLine("2. Edit average game length");
             Console.WriteLine("3. Edit deck playable status");
             Console.WriteLine("4. Edit game genres");
-            Console.WriteLine("5. See further editing options");
+            Console.WriteLine("5. Edit session status");
+            Console.WriteLine("6. See further editing options");
             Console.WriteLine("0. Go back");
-            int userInput = Format.GetSingleResponse(5, $"What would you like to edit about {gameName}?");
+            int userInput = Format.GetSingleResponse(6, $"What would you like to edit about {gameName}?");
             switch (userInput)
             {
                 case 0:
@@ -580,6 +598,9 @@ namespace GameTrackerEx01
                     EditGenres();
                     break;
                 case 5:
+                    EditSessionStatus();
+                    break;
+                case 6:
                     EditFurtherDetails();
                     break;
             }
@@ -1046,6 +1067,10 @@ namespace GameTrackerEx01
                     break;
                 case var _ when playing:
                     Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<CurrentGame>(gameID).logMessageIDs.Append(logID).ToArray();
+                    if (Menu.FindLog(logID).logDate > Menu.FindDetailedGameByID<CurrentGame>(gameID).lastPlayed)
+                    {
+                        Menu.FindDetailedGameByID<CurrentGame>(gameID).lastPlayed = Menu.FindLog(logID).logDate;
+                    }
                     break;
                 case var _ when !playing && !completed:
                     Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs = Menu.FindDetailedGameByID<DroppedGame>(gameID).logMessageIDs.Append(logID).ToArray();
