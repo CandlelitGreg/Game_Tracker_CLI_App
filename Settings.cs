@@ -7,7 +7,7 @@ namespace GameTrackerEx01
     {
         public SettingsMap()
         {
-            Map(m => m.dateLastUsed).Convert(args => args.Value.activeSettingsID == args.Value.settingsID ? DateOnly.FromDateTime(DateTime.Now).ToString("MM/dd/yyyy") : args.Value.dateLastUsed.ToString("MM/dd/yyyy"));
+            Map(m => m.dateLastUsed);
             Map(m => m.settingsID);
             Map(m => m.fileName);
             Map(m => m.nextSettingsID);
@@ -60,7 +60,7 @@ namespace GameTrackerEx01
     {
         public RetrieveSettingsMap()
         {
-            Map(m => m.dateLastUsed).Convert(args => args.Value.activeSettingsID == args.Value.settingsID ? DateOnly.FromDateTime(DateTime.Now).ToString("MM/dd/yyyy") : args.Value.dateLastUsed.ToString("MM/dd/yyyy"));
+            Map(m => m.dateLastUsed);
             Map(m => m.settingsID);
             Map(m => m.fileName);
             Map(m => m.nextSettingsID);
@@ -855,6 +855,12 @@ namespace GameTrackerEx01
                 return true;
             }
             return false;
+        }
+
+        public void UpdateLastUsed()
+        {
+            dateLastUsed = DateOnly.FromDateTime(DateTime.Now);
+            Console.WriteLine("Updating last used");
         }
 
         public void SaveSettings()

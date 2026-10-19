@@ -449,6 +449,7 @@ namespace GameTrackerEx01
                     highIndex = midIndex - 1;
                 }
             }
+            Console.WriteLine("Error: Unable to find detailed version of game");
             return default(T);
         }
         public static VideoGame FindGameByTitle(string searchTitle)

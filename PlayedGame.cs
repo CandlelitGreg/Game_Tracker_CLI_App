@@ -69,6 +69,7 @@ namespace GameTrackerEx01
                     droppedVersion.SaveGameInfo();
                 }
             }
+            Menu.SortGameLists();
         }
         public void StartPlaythrough()
         {   

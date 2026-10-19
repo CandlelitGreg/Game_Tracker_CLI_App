@@ -11,6 +11,8 @@ namespace GameTrackerEx01
     {
         public static void UpdateAllFiles()
         {
+            // Menu.FindSettingsFile(Menu.backupFiles[0].activeSettingsID).dateLastUsed = DateOnly.FromDateTime(DateTime.Now);
+            Menu.mainFiles.UpdateLastUsed();
             UpdateInfoFile<Genre>(Menu.existingGenres, Menu.mainFiles.genreFile);
             UpdateInfoFile<Franchise>(Menu.existingFranchises, Menu.mainFiles.franchiseFile);
             UpdateInfoFile<LogMessage>(Menu.existingLogMessages, Menu.mainFiles.logEntryFile);
